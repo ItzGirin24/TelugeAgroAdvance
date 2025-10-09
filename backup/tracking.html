@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelugeAgro - Tracking Pesanan</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6v8-2Q1Qk9T2YdF8xJcN5Y8xJcN5Y8xJc",
+            authDomain: "telugeagro.firebaseapp.com",
+            projectId: "telugeagro",
+            storageBucket: "telugeagro.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.doc = doc;
+        window.getDoc = getDoc;
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            min-height: 100vh;
+        }
+
+        .tracking-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .status-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .status-item {
+            position: relative;
+            padding: 1rem 0;
+            margin-left: 1rem;
+        }
+
+        .status-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 1.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+        }
+
+        .status-item.active::before {
+            background: #22c55e;
+        }
+
+        .status-item.completed::before {
+            background: #22c55e;
+        }
+
+        .status-item.completed::after {
+            content: '✓';
+            position: absolute;
+            left: -2.3rem;
+            top: 1.2rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #22c55e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .order-details {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" alt="TelugeAgro" class="w-12 h-12 rounded-full">
+                    <div>
+                        <h1 class="text-2xl font-bold text-green-600">TelugeAgro</h1>
+                        <p class="text-sm text-gray-600">Tracking Pesanan</p>
+                    </div>
+                </div>
+                <a href="store.html" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    Kembali ke Toko
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="tracking-container">
+        <!-- Search Form -->
+        <div class="bg-white rounded-xl p-6 shadow-lg mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Cek Status Pesanan Anda</h2>
+            <div class="flex gap-4">
+                <input
+                    type="text"
+                    id="order-id-input"
+                    placeholder="Masukkan Order ID (contoh: ABC123456)"
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                <button
+                    onclick="trackOrder()"
+                    class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                >
+                    Cek Status
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">
+                Order ID dapat ditemukan di email konfirmasi atau halaman sukses pembayaran
+            </p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden text-center py-8">
+            <div class="loading-spinner"></div>
+            <p class="text-gray-600 mt-4">Mencari pesanan...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden status-card text-center">
+            <div class="text-6xl mb-4">❌</div>
+            <h3 class="text-xl font-semibold text-red-600 mb-2">Pesanan Tidak Ditemukan</h3>
+            <p class="text-gray-600 mb-4">
+                Pastikan Order ID yang Anda masukkan sudah benar dan coba lagi.
+            </p>
+            <button onclick="resetSearch()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                Coba Lagi
+            </button>
+        </div>
+
+        <!-- Order Status -->
+        <div id="order-status" class="hidden status-card">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800">Status Pesanan</h3>
+                    <p class="text-gray-600">Order ID: <span id="display-order-id" class="font-semibold"></span></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">Tanggal Pesan</p>
+                    <p class="font-semibold" id="order-date"></p>
+                </div>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="status-timeline">
+                <div class="status-item active">
+                    <h4 class="font-semibold text-green-600">Pesanan Diterima</h4>
+                    <p class="text-sm text-gray-600">Pesanan Anda telah berhasil diterima dan sedang diproses</p>
+                </div>
+                <div class="status-item" id="status-processing">
+                    <h4 class="font-semibold text-gray-600">Sedang Diproses</h4>
+                    <p class="text-sm text-gray-600">Tim kami sedang menyiapkan pesanan Anda</p>
+                </div>
+                <div class="status-item" id="status-shipping">
+                    <h4 class="font-semibold text-gray-600">Dalam Pengiriman</h4>
+                    <p class="text-sm text-gray-600">Pesanan Anda sedang dalam perjalanan</p>
+                </div>
+                <div class="status-item" id="status-delivered">
+                    <h4 class="font-semibold text-gray-600">Selesai</h4>
+                    <p class="text-sm text-gray-600">Pesanan telah sampai ke tujuan</p>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="order-details">
+                <h4 class="font-semibold text-gray-800 mb-4">Detail Pesanan</h4>
+                <div id="order-items">
+                    <!-- Order items will be populated here -->
+                </div>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t">
+                    <span class="font-semibold">Total Pembayaran:</span>
+                    <span class="text-xl font-bold text-green-600" id="order-total"></span>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="order-details">
+                <h4 class="font-semibold text-gray-800 mb-4">Informasi Pengiriman</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Nama Penerima</p>
+                        <p class="font-semibold" id="customer-name"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Nomor Telepon</p>
+                        <p class="font-semibold" id="customer-phone"></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-600">Alamat Pengiriman</p>
+                        <p class="font-semibold" id="customer-address"></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-600">Catatan</p>
+                        <p class="font-semibold" id="customer-notes"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 class="font-semibold text-blue-800 mb-2">Butuh Bantuan?</h4>
+                <p class="text-blue-700 text-sm mb-3">
+                    Jika ada pertanyaan tentang pesanan Anda, hubungi kami melalui WhatsApp
+                </p>
+                <button onclick="contactSupport()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                    💬 Hubungi Support
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // Initialize AOS
+        AOS.init();
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            toastMessage.textContent = message;
+            toast.className = `toast fixed bottom-4 right-4 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-0 transition-transform duration-300`;
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-full');
+            }, 3000);
+        }
+
+        // Track order function
+        async function trackOrder() {
+            const orderId = document.getElementById('order-id-input').value.trim().toUpperCase();
+
+            if (!orderId) {
+                showToast('Masukkan Order ID terlebih dahulu', 'error');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('order-status').classList.add('hidden');
+
+            try {
+                // Query Firestore for order
+                const orderRef = window.doc(window.db, 'orders', orderId);
+                const orderSnap = await window.getDoc(orderRef);
+
+                if (orderSnap.exists()) {
+                    const orderData = orderSnap.data();
+                    displayOrderStatus(orderId, orderData);
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error fetching order:', error);
+                showError();
+            }
+
+            // Hide loading
+            document.getElementById('loading-state').classList.add('hidden');
+        }
+
+        // Display order status
+        function displayOrderStatus(orderId, orderData) {
+            // Update order info
+            document.getElementById('display-order-id').textContent = orderId;
+            document.getElementById('order-date').textContent = new Date(orderData.timestamp?.toDate?.() || orderData.timestamp).toLocaleDateString('id-ID');
+            document.getElementById('order-total').textContent = `Rp ${formatPrice(orderData.total || 0)}`;
+
+            // Update customer info
+            document.getElementById('customer-name').textContent = orderData.name || 'N/A';
+            document.getElementById('customer-phone').textContent = orderData.phone || 'N/A';
+            document.getElementById('customer-address').textContent = orderData.address || 'N/A';
+            document.getElementById('customer-notes').textContent = orderData.notes || 'Tidak ada catatan';
+
+            // Update order items
+            const orderItemsContainer = document.getElementById('order-items');
+            orderItemsContainer.innerHTML = '';
+
+            if (orderData.items && orderData.items.length > 0) {
+                orderData.items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'product-item';
+                    itemElement.innerHTML = `
+                        <div>
+                            <h5 class="font-semibold">${item.product || 'Produk'}</h5>
+                            <p class="text-sm text-gray-600">${item.quantity || 0} kg</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold">Rp ${formatPrice(item.price || 0)}</p>
+                        </div>
+                    `;
+                    orderItemsContainer.appendChild(itemElement);
+                });
+            }
+
+            // Update status timeline based on order status
+            updateStatusTimeline(orderData.status || 'received');
+
+            // Show order status
+            document.getElementById('order-status').classList.remove('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+
+            showToast('Status pesanan berhasil dimuat!');
+        }
+
+        // Update status timeline
+        function updateStatusTimeline(status) {
+            const statuses = ['received', 'processing', 'shipping', 'delivered'];
+            const statusIndex = statuses.indexOf(status);
+
+            statuses.forEach((statusName, index) => {
+                const element = document.getElementById(`status-${statusName}`);
+                if (index <= statusIndex) {
+                    element.classList.add('completed');
+                    if (index < statusIndex) {
+                        element.classList.add('completed');
+                    } else if (index === statusIndex) {
+                        element.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // Show error state
+        function showError() {
+            document.getElementById('error-state').classList.remove('hidden');
+            document.getElementById('order-status').classList.add('hidden');
+            showToast('Pesanan tidak ditemukan', 'error');
+        }
+
+        // Reset search
+        function resetSearch() {
+            document.getElementById('order-id-input').value = '';
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('order-status').classList.add('hidden');
+        }
+
+        // Contact support
+        function contactSupport() {
+            const orderId = document.getElementById('display-order-id').textContent;
+            const message = `Halo TelugeAgro! Saya ingin menanyakan status pesanan dengan Order ID ${orderId}. Mohon bantuan nya.`;
+            const whatsappUrl = `https://wa.me/628112638318?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Format price helper
+        function formatPrice(price) {
+            return new Intl.NumberFormat('id-ID').format(price);
+        }
+
+        // Enter key support
+        document.getElementById('order-id-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                trackOrder();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Anda - Teluge Agro</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+</head>
+<body class="bg-green-50 text-gray-800">
+    <!-- Header -->
+    <header class="bg-green-700 text-white py-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center px-4 relative">
+            <div class="flex items-center space-x-2">
+                <img src="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" alt="Logo Teluge Agro" class="w-8 h-8 rounded-full">
+                <h1 class="text-2xl font-bold text-shadow-green">Teluge Agro</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-green-300">Beranda</a>
+                <a href="leadingpage.html" class="hover:text-green-300">Tentang</a>
+                <a href="store.html" class="hover:text-green-300">Toko</a>
+                <a href="cart.html" class="hover:text-green-300">Keranjang</a>
+            </nav>
+            <button id="hamburger-btn" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <nav id="mobile-menu" class="hidden bg-green-600 text-white px-4 py-2 md:hidden">
+            <a href="index.html" class="block py-2 hover:text-green-300">Beranda</a>
+            <a href="leadingpage.html" class="block py-2 hover:text-green-300">Tentang</a>
+            <a href="store.html" class="block py-2 hover:text-green-300">Toko</a>
+            <a href="cart.html" class="block py-2 hover:text-green-300">Keranjang</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl md:text-3xl font-bold text-center text-green-800 mb-8" data-aos="fade-up">Pesanan Anda</h2>
+
+            <!-- Order Search -->
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8" data-aos="fade-up">
+                <h3 class="text-lg md:text-xl font-semibold text-green-700 mb-4">Cari Pesanan Anda</h3>
+                <div class="space-y-4">
+                    <!-- Search Type Selection -->
+                    <div class="flex gap-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="searchType" value="orderId" checked class="mr-2">
+                            <span class="text-sm">Cari dengan ID Pesanan</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="searchType" value="email" class="mr-2">
+                            <span class="text-sm">Cari dengan Email</span>
+                        </label>
+                    </div>
+
+                    <!-- Order ID Input -->
+                    <div id="orderIdSection" class="flex flex-col sm:flex-row gap-4">
+                        <input type="text" id="orderIdInput" placeholder="Masukkan ID pesanan Anda"
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base">
+                        <button id="trackOrderBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap">
+                            Lacak Pesanan
+                        </button>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div id="emailSection" class="hidden flex flex-col sm:flex-row gap-4">
+                        <input type="email" id="emailInput" placeholder="Masukkan email yang tertaut pada pesanan Anda"
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base">
+                        <button id="searchByEmailBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap">
+                            Cari Pesanan
+                        </button>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">ID pesanan dapat ditemukan di email konfirmasi pesanan Anda</p>
+            </div>
+
+                <!-- Order Status Display -->
+                <div id="orderStatus" class="hidden bg-white rounded-lg shadow-lg p-4 md:p-6 max-w-sm mx-auto" data-aos="fade-up">
+                    <div class="mb-4 md:mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg md:text-xl font-semibold text-green-700">Status Pesanan</h3>
+                            <button id="backToSearchBtn" class="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition text-sm flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                                Kembali
+                            </button>
+                        </div>
+                        <p class="text-gray-600 text-sm md:text-base break-words">ID Pesanan: <span id="displayOrderId" class="font-semibold"></span></p>
+                    </div>
+
+                <!-- Enhanced Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex flex-wrap justify-between items-center mb-3 overflow-x-auto no-scrollbar gap-2">
+                        <div class="flex items-center min-w-0 flex-shrink-0">
+                            <div id="step1" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
+                                <span id="step1-icon" class="hidden">✓</span>
+                                <span id="step1-number">1</span>
+                            </div>
+                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Proses</span>
+                        </div>
+                        <div class="flex items-center min-w-0 flex-shrink-0">
+                            <div id="step2" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
+                                <span id="step2-icon" class="hidden">✓</span>
+                                <span id="step2-number">2</span>
+                            </div>
+                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Sedang Dikemas</span>
+                        </div>
+                        <div class="flex items-center min-w-0 flex-shrink-0">
+                            <div id="step3" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
+                                <span id="step3-icon" class="hidden">✓</span>
+                                <span id="step3-number">3</span>
+                            </div>
+                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Pengiriman</span>
+                        </div>
+                        <div class="flex items-center min-w-0 flex-shrink-0">
+                            <div id="step4" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
+                                <span id="step4-icon" class="hidden">✓</span>
+                                <span id="step4-number">4</span>
+                            </div>
+                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Sampai Tujuan</span>
+                        </div>
+                    </div>
+                    <div class="relative h-2 rounded-full bg-gray-200 overflow-hidden">
+                        <div id="progressBar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                    </div>
+                    <!-- Current Status Text -->
+                    <div class="mt-3 text-center">
+                        <p id="currentStatusText" class="text-sm font-medium text-gray-600">Memproses pesanan Anda...</p>
+                        <p id="estimatedTime" class="text-xs text-gray-500 mt-1">Estimasi: 1-3 hari kerja</p>
+                    </div>
+                </div>
+
+                <!-- Status Details -->
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-semibold text-green-700 mb-2 text-base">Detail Pesanan</h4>
+                        <div id="orderDetails" class="space-y-1 text-sm md:text-base break-words">
+                            <!-- Order details will be populated here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-green-700 mb-2 text-base">Status Pembayaran</h4>
+                        <div id="paymentStatus" class="p-3 rounded-lg border-2 text-sm md:text-base break-words">
+                            <!-- Payment status will be shown here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Reminder -->
+                <div id="paymentReminder" class="mt-4 p-3 bg-orange-100 border-l-4 border-orange-500 rounded-lg hidden text-sm md:text-base break-words">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-orange-800">Pembayaran Belum Diterima</h4>
+                            <p class="text-orange-700">Silakan segera lakukan pembayaran agar pesanan dapat diproses.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Success -->
+                <div id="paymentSuccess" class="mt-4 p-3 bg-green-100 border-l-4 border-green-500 rounded-lg hidden text-sm md:text-base break-words">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-green-800">Pembayaran Diterima</h4>
+                            <p class="text-green-700">Terima kasih! Pembayaran Anda telah diterima dan pesanan sedang diproses.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden bg-red-100 border-l-4 border-red-500 p-4 rounded-lg" data-aos="fade-up">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h4 class="font-semibold text-red-800">Pesanan Tidak Ditemukan</h4>
+                        <p class="text-red-700 text-sm">ID pesanan yang Anda masukkan tidak valid atau tidak ditemukan. Silakan periksa kembali ID pesanan Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2017 Teluge Agro. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <style>
+        .step-circle {
+            background-color: #d1d5db;
+            color: #6b7280;
+            transition: all 0.3s ease;
+        }
+        .step-circle.active {
+            background-color: #16a34a;
+            color: white;
+        }
+        .step-circle.completed {
+            background-color: #16a34a;
+            color: white;
+        }
+        .text-shadow-green {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import {
+            getFirestore,
+            doc,
+            getDoc,
+            query,
+            where,
+            getDocs,
+            orderBy,
+            collection,
+            onSnapshot
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
+            authDomain: "telugeagro2025.firebaseapp.com",
+            projectId: "telugeagro2025",
+            storageBucket: "telugeagro2025.firebasestorage.app",
+            messagingSenderId: "1029963109637",
+            appId: "1:1029963109637:web:86824d0db45e1489b3136c",
+            measurementId: "G-XF1JDPME66"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Order status mapping
+        const statusMap = {
+            'process': { step: 1, label: 'Proses', color: 'bg-blue-500' },
+            'packing': { step: 2, label: 'Sedang Dikemas', color: 'bg-yellow-500' },
+            'shipping': { step: 3, label: 'Pengiriman', color: 'bg-orange-500' },
+            'delivered': { step: 4, label: 'Sampai Tujuan', color: 'bg-green-500' },
+            'completed': { step: 5, label: 'Selesai', color: 'bg-green-600' }
+        };
+
+        // Global variable to track navigation state
+        let currentView = 'search'; // 'search', 'multiple', 'single'
+        let multipleOrdersData = []; // Store multiple orders data
+        let currentOrderId = null; // Track current order ID for real-time updates
+        let unsubscribeListener = null; // Store unsubscribe function for real-time listener
+
+        // Track order function (make it global for onclick access)
+        window.trackOrder = async function(orderId) {
+            try {
+                const orderDoc = await getDoc(doc(db, 'orders', orderId));
+
+                if (orderDoc.exists()) {
+                    const order = orderDoc.data();
+                    currentView = 'single';
+                    displayOrderStatus(order, orderId);
+                    hideErrorMessage();
+                } else {
+                    showErrorMessage();
+                    hideOrderStatus();
+                }
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                showErrorMessage();
+                hideOrderStatus();
+            }
+        };
+
+        // Track single order by ID (for direct search)
+        async function trackSingleOrder(orderId) {
+            try {
+                const orderDoc = await getDoc(doc(db, 'orders', orderId));
+
+                if (orderDoc.exists()) {
+                    const order = orderDoc.data();
+                    currentView = 'single';
+                    currentOrderId = orderId;
+                    displayOrderStatus(order, orderId);
+                    setupRealTimeListener(orderId);
+                    hideErrorMessage();
+                } else {
+                    showErrorMessage();
+                    hideOrderStatus();
+                }
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                showErrorMessage();
+                hideOrderStatus();
+            }
+        }
+
+        // Setup real-time listener for order updates
+        function setupRealTimeListener(orderId) {
+            // Clean up existing listener if any
+            if (unsubscribeListener) {
+                unsubscribeListener();
+                unsubscribeListener = null;
+            }
+
+            try {
+                const orderRef = doc(db, 'orders', orderId);
+
+                // Set up real-time listener
+                unsubscribeListener = onSnapshot(orderRef, (doc) => {
+                    if (doc.exists()) {
+                        const updatedOrder = doc.data();
+                        console.log('Order updated in real-time:', updatedOrder);
+
+                        // Update the display with new data
+                        displayOrderStatus(updatedOrder, orderId);
+
+                        // Show notification about the update
+                        showUpdateNotification(updatedOrder);
+                    } else {
+                        console.log('Order document no longer exists');
+                        showErrorMessage();
+                        hideOrderStatus();
+                    }
+                }, (error) => {
+                    console.error('Error in real-time listener:', error);
+                });
+
+                console.log('Real-time listener set up for order:', orderId);
+            } catch (error) {
+                console.error('Error setting up real-time listener:', error);
+            }
+        }
+
+        // Show notification when order is updated
+        function showUpdateNotification(order) {
+            // Remove any existing notification
+            const existingNotification = document.getElementById('updateNotification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.id = 'updateNotification';
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <p class="font-semibold">Status Pesanan Diperbarui!</p>
+                        <p class="text-sm opacity-90">Status pesanan Anda telah berubah</p>
+                    </div>
+                </div>
+            `;
+
+            // Add to page
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Clean up real-time listener
+        function cleanupRealTimeListener() {
+            if (unsubscribeListener) {
+                console.log('Cleaning up real-time listener');
+                unsubscribeListener();
+                unsubscribeListener = null;
+            }
+        }
+
+        // Search orders by email
+        async function searchOrdersByEmail(email) {
+            try {
+                // First, get all orders for the email without orderBy to avoid index requirement
+                const ordersQuery = query(collection(db, 'orders'), where('email', '==', email));
+                const querySnapshot = await getDocs(ordersQuery);
+
+                if (!querySnapshot.empty) {
+                    const orders = [];
+                    querySnapshot.forEach((doc) => {
+                        orders.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+
+                    // Sort orders by timestamp in descending order (newest first)
+                    orders.sort((a, b) => {
+                        if (!a.timestamp || !b.timestamp) return 0;
+                        return b.timestamp.toDate() - a.timestamp.toDate();
+                    });
+
+                    // Store orders data for back navigation
+                    multipleOrdersData = orders;
+                    currentView = 'multiple';
+
+                    displayMultipleOrders(orders);
+                    hideErrorMessage();
+                } else {
+                    showErrorMessage();
+                    hideOrderStatus();
+                }
+            } catch (error) {
+                console.error('Error searching orders by email:', error);
+                showErrorMessage();
+                hideOrderStatus();
+            }
+        }
+
+        // Display multiple orders
+        function displayMultipleOrders(orders) {
+            const orderStatusDiv = document.getElementById('orderStatus');
+            const displayOrderId = document.getElementById('displayOrderId');
+            const orderDetails = document.getElementById('orderDetails');
+            const paymentStatus = document.getElementById('paymentStatus');
+
+            // Set title for multiple orders
+            displayOrderId.textContent = `${orders.length} Pesanan Ditemukan`;
+
+            // Display order list
+            orderDetails.innerHTML = orders.map(order => `
+                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-green-700">ID: ${order.id}</h4>
+                        <button onclick="trackOrder('${order.id}')" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                            Lihat Detail →
+                        </button>
+                    </div>
+                    <p><strong>Nama:</strong> ${order.customerName || order.name}</p>
+                    <p><strong>Total:</strong> Rp. ${order.total.toFixed(0)}</p>
+                    <p><strong>Tanggal:</strong> ${order.timestamp.toDate().toLocaleString('id-ID')}</p>
+                    <p><strong>Status:</strong> ${getStatusLabel(order.status || 'process')}</p>
+                </div>
+            `).join('');
+
+            // Display payment status summary
+            const paidOrders = orders.filter(order => order.paymentStatus === 'paid').length;
+            paymentStatus.className = 'p-4 rounded-lg border-2 border-blue-500 bg-blue-50';
+            paymentStatus.innerHTML = `
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded-full bg-blue-500 mr-3"></div>
+                    <div>
+                        <p class="font-semibold text-blue-800">
+                            ${paidOrders}/${orders.length} Pesanan Sudah Dibayar
+                        </p>
+                        <p class="text-sm text-blue-600">
+                            Klik "Lihat Detail" untuk informasi lengkap
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            // Hide progress bar for multiple orders view
+            document.getElementById('progressBar').style.width = '0%';
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).className = 'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm step-circle';
+            }
+
+            // Hide payment notifications
+            document.getElementById('paymentReminder').classList.add('hidden');
+            document.getElementById('paymentSuccess').classList.add('hidden');
+
+            // Show order status
+            orderStatusDiv.classList.remove('hidden');
+            orderStatusDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Helper function to get status label
+        function getStatusLabel(status) {
+            const labels = {
+                'process': 'Proses',
+                'packing': 'Sedang Dikemas',
+                'shipping': 'Pengiriman',
+                'delivered': 'Sampai Tujuan'
+            };
+            return labels[status] || 'Proses';
+        }
+
+        function displayOrderStatus(order, orderId) {
+            const orderStatusDiv = document.getElementById('orderStatus');
+            const displayOrderId = document.getElementById('displayOrderId');
+            const orderDetails = document.getElementById('orderDetails');
+            const paymentStatus = document.getElementById('paymentStatus');
+
+            // Set order ID
+            displayOrderId.textContent = orderId;
+
+            // Helper function to format address
+            function formatAddress(order) {
+                const addressFields = [
+                    order.shippingAddress,
+                    order.deliveryAddress,
+                    order.address,
+                    order.customerAddress
+                ];
+
+                for (const addr of addressFields) {
+                    if (addr) {
+                        if (typeof addr === 'string') {
+                            return addr;
+                        } else if (typeof addr === 'object') {
+                            const parts = [];
+                            if (addr.street) parts.push(addr.street);
+                            if (addr.city) parts.push(addr.city);
+                            if (addr.province) parts.push(addr.province);
+                            if (addr.postalCode) parts.push(addr.postalCode);
+                            if (addr.country) parts.push(addr.country);
+                            return parts.join(', ');
+                        }
+                    }
+                }
+                return 'N/A';
+            }
+
+            // Display order details
+            orderDetails.innerHTML = `
+                <p><strong>Nama:</strong> ${order.customerName || order.name}</p>
+                <p><strong>Email:</strong> ${order.email}</p>
+                <p><strong>Telepon:</strong> ${order.phone || 'N/A'}</p>
+                <p><strong>Alamat:</strong> ${formatAddress(order)}</p>
+                <p><strong>Total:</strong> Rp. ${order.total.toFixed(0)}</p>
+                <p><strong>Tanggal:</strong> ${order.timestamp.toDate().toLocaleString('id-ID')}</p>
+            `;
+
+            // Display payment status
+            const paymentPaid = order.paymentStatus === 'paid';
+            paymentStatus.className = `p-4 rounded-lg border-2 ${paymentPaid ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`;
+            paymentStatus.innerHTML = `
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded-full ${paymentPaid ? 'bg-green-500' : 'bg-orange-500'} mr-3"></div>
+                    <div>
+                        <p class="font-semibold ${paymentPaid ? 'text-green-800' : 'text-orange-800'}">
+                            ${paymentPaid ? 'Sudah Dibayar' : 'Belum Dibayar'}
+                        </p>
+                        <p class="text-sm ${paymentPaid ? 'text-green-600' : 'text-orange-600'}">
+                            ${paymentPaid ? 'Pembayaran telah diterima' : 'Menunggu pembayaran'}
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            // Update progress bar and steps with enhanced functionality
+            updateProgress(order.status || 'process', paymentPaid);
+
+            // Show/hide payment notifications
+            const paymentReminder = document.getElementById('paymentReminder');
+            const paymentSuccess = document.getElementById('paymentSuccess');
+
+            if (!paymentPaid) {
+                paymentReminder.classList.remove('hidden');
+                paymentSuccess.classList.add('hidden');
+            } else {
+                paymentReminder.classList.add('hidden');
+                paymentSuccess.classList.remove('hidden');
+            }
+
+            // Show order status
+            orderStatusDiv.classList.remove('hidden');
+            orderStatusDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateProgress(status, paymentPaid) {
+            console.log('updateProgress called with status:', status, 'paymentPaid:', paymentPaid);
+            console.log('Available statusMap:', statusMap);
+
+            const statusInfo = statusMap[status] || statusMap['process'];
+            console.log('statusInfo:', statusInfo);
+
+            const progressPercentage = (statusInfo.step / 4) * 100;
+            console.log('progressPercentage:', progressPercentage);
+
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progressPercentage}%`;
+
+            // Update step circles with checkmarks
+            for (let i = 1; i <= 4; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                const stepIcon = document.getElementById(`step${i}-icon`);
+                const stepNumber = document.getElementById(`step${i}-number`);
+
+                console.log(`Processing step ${i}, statusInfo.step: ${statusInfo.step}`);
+
+                stepElement.className = 'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm step-circle transition-all duration-300';
+
+                if (i < statusInfo.step) {
+                    // Completed steps - show checkmark
+                    console.log(`Step ${i} is completed`);
+                    stepElement.classList.add('completed');
+                    stepIcon.classList.remove('hidden');
+                    stepNumber.classList.add('hidden');
+                } else if (i === statusInfo.step) {
+                    // Current step - show number
+                    console.log(`Step ${i} is active`);
+                    stepElement.classList.add('active');
+                    stepIcon.classList.add('hidden');
+                    stepNumber.classList.remove('hidden');
+                } else {
+                    // Future steps - show number
+                    console.log(`Step ${i} is future`);
+                    stepElement.classList.remove('active', 'completed');
+                    stepIcon.classList.add('hidden');
+                    stepNumber.classList.remove('hidden');
+                }
+            }
+
+            // Update status text and estimated time
+            const statusText = document.getElementById('currentStatusText');
+            const estimatedTime = document.getElementById('estimatedTime');
+
+            if (!paymentPaid) {
+                statusText.textContent = 'Menunggu pembayaran untuk memproses pesanan';
+                estimatedTime.textContent = 'Estimasi: Setelah pembayaran diterima';
+            } else {
+                switch(status) {
+                    case 'process':
+                        statusText.textContent = 'Pesanan Anda sedang diproses';
+                        estimatedTime.textContent = 'Estimasi: 1-2 hari kerja';
+                        break;
+                    case 'packing':
+                        statusText.textContent = 'Pesanan Anda sedang dikemas';
+                        estimatedTime.textContent = 'Estimasi: 2-3 hari kerja';
+                        break;
+                    case 'shipping':
+                        statusText.textContent = 'Pesanan Anda dalam perjalanan';
+                        estimatedTime.textContent = 'Estimasi: 3-5 hari kerja';
+                        break;
+                    case 'delivered':
+                        statusText.textContent = 'Pesanan Anda telah sampai!';
+                        estimatedTime.textContent = 'Terima kasih telah berbelanja';
+                        break;
+                    default:
+                        statusText.textContent = 'Memproses pesanan Anda...';
+                        estimatedTime.textContent = 'Estimasi: 1-3 hari kerja';
+                }
+            }
+
+            // Note: Progress bar shows actual order status, payment status only affects the text message
+        }
+
+        function showErrorMessage() {
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+
+        function hideErrorMessage() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function hideOrderStatus() {
+            document.getElementById('orderStatus').classList.add('hidden');
+        }
+
+        // Radio button toggle functionality
+        document.querySelectorAll('input[name="searchType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const orderIdSection = document.getElementById('orderIdSection');
+                const emailSection = document.getElementById('emailSection');
+
+                if (e.target.value === 'email') {
+                    orderIdSection.classList.add('hidden');
+                    emailSection.classList.remove('hidden');
+                } else {
+                    emailSection.classList.add('hidden');
+                    orderIdSection.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Event listeners
+        document.getElementById('trackOrderBtn').addEventListener('click', () => {
+            const orderId = document.getElementById('orderIdInput').value.trim();
+            if (orderId) {
+                trackSingleOrder(orderId);
+            }
+        });
+
+        document.getElementById('searchByEmailBtn').addEventListener('click', () => {
+            const email = document.getElementById('emailInput').value.trim();
+            if (email) {
+                searchOrdersByEmail(email);
+            }
+        });
+
+        document.getElementById('orderIdInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const orderId = e.target.value.trim();
+                if (orderId) {
+                    trackSingleOrder(orderId);
+                }
+            }
+        });
+
+        document.getElementById('emailInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const email = e.target.value.trim();
+                if (email) {
+                    searchOrdersByEmail(email);
+                }
+            }
+        });
+
+        // Back button functionality with proper navigation
+        document.getElementById('backToSearchBtn').addEventListener('click', () => {
+            // Clean up real-time listener when leaving single order view
+            if (currentView === 'single') {
+                cleanupRealTimeListener();
+                currentOrderId = null;
+            }
+
+            hideOrderStatus();
+            hideErrorMessage();
+
+            // Navigate based on current view state
+            if (currentView === 'single' && multipleOrdersData.length > 0) {
+                // If coming from single order view and we have multiple orders data, go back to multiple orders
+                currentView = 'multiple';
+                displayMultipleOrders(multipleOrdersData);
+            } else {
+                // If coming from search or no multiple orders data, go back to search form
+                currentView = 'search';
+                // Clear input fields
+                document.getElementById('orderIdInput').value = '';
+                document.getElementById('emailInput').value = '';
+                // Scroll back to search form
+                document.querySelector('.bg-white.rounded-lg.shadow-lg').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Hamburger menu toggle
+        document.getElementById('hamburger-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
