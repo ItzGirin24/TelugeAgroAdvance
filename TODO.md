@@ -1,20 +1,21 @@
-# Fix Cart Functionality: Items not appearing in cart.html
+# TODO: Update store.html with Authentication and Cart Enhancements
 
-## Problem
-Items added in store.html do not appear in cart.html due to localStorage key mismatch.
+## Navigation UI Updates
+- [x] Replace login button in desktop navigation with auth-button-container HTML
+- [ ] Replace login link in mobile menu with auth-button-container HTML
 
-## Root Cause
-- store.html uses dynamic keys like 'cart_useremail' or 'cart_admin' based on login status
-- cart.html reads from fixed key 'cart'
-- This mismatch prevents cart items from being shared between pages
+## Script Functions Addition/Modification
+- [ ] Add authentication check functions (checkUserLogin, getUserUID, redirectToLogin)
+- [ ] Modify addToCart function to include authentication check and user-specific cart
+- [ ] Add addToCartHistory function
+- [ ] Modify updateCartCount to use user-specific cart and update multiple elements
+- [ ] Add checkLoginStatus function
+- [x] Add logoutUser function
+- [ ] Modify showCartNotification to accept productName parameter
+- [ ] Update DOMContentLoaded initialization to include checkLoginStatus
 
-## Solution
-Update store.html to use consistent 'cart' key for localStorage operations.
-
-## Steps
-- [ ] Remove getCartKey() function from store.html
-- [ ] Update addToCart() function to use 'cart' key
-- [ ] Update updateCartCount() function to use 'cart' key
-- [ ] Update updateCartDisplay() function to use 'cart' key
-- [ ] Test adding items in store.html and verify they appear in cart.html
-- [ ] Test cart count updates and quantity changes
+## Testing
+- [ ] Verify authentication flow works
+- [ ] Test cart operations for logged-in users
+- [ ] Check UI updates on login/logout
+- [ ] Ensure cart counts update correctly

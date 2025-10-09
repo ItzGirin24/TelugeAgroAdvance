@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TelugeAgro</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
+            authDomain: "telugeagro2025.firebaseapp.com",
+            projectId: "telugeagro2025",
+            storageBucket: "telugeagro2025.firebasestorage.app",
+            messagingSenderId: "1029963109637",
+            appId: "1:1029963109637:web:86824d0db45e1489b3136c",
+            measurementId: "G-XF1JDPME66"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Make Firebase available globally
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.provider = provider;
+        window.signInWithPopup = signInWithPopup;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signOut = signOut;
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .avatar:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .avatar::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #22c55e, #16a34a, #15803d, #22c55e);
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .avatar:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-google {
+            background: white;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .btn-google:hover {
+            border-color: #22c55e;
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .user-info {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-left: 4px solid #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 opacity-0.1 bg-pattern" style="background-image: radial-gradient(circle at 25% 25%, white 2px, transparent 2px), radial-gradient(circle at 75% 75%, white 2px, transparent 2px); background-size: 50px 50px;"></div>
+
+    <!-- Main Container -->
+    <div class="glass-container rounded-3xl w-full max-w-md mx-4 overflow-hidden relative">
+        <!-- Header -->
+        <div class="text-center p-8 pb-4">
+            <div class="avatar w-24 h-24 mx-auto mb-6 relative">
+                <img src="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" alt="TelugeAgro Logo" class="w-full h-full object-cover rounded-full border-4 border-white shadow-2xl">
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Masuk ke TelugeAgro</h1>
+            <p class="text-gray-600 text-sm">Belanja pisang premium dengan mudah</p>
+        </div>
+
+        <!-- Login Form Container -->
+        <div id="loginContainer" class="px-8 pb-8">
+            <!-- Google Sign-In Button (Primary) -->
+            <div class="mb-6">
+                <button id="googleSignInBtn" class="btn-google w-full flex items-center justify-center px-6 py-4 rounded-xl font-semibold text-gray-700 hover:text-green-600 transition-all" disabled>
+                    <div class="loading mr-3" style="display: none;" id="googleLoading"></div>
+                    <svg id="googleIcon" class="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span id="googleBtnText">Masuk dengan Google</span>
+                </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">atau masuk sebagai admin</span>
+                </div>
+            </div>
+
+            <!-- Admin Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Admin</label>
+                    <input type="email" id="username" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="teluge@admin.app">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-login w-full text-white font-semibold py-3 rounded-xl" disabled>
+                    <span class="loading mr-2" style="display: none;" id="adminLoading"></span>
+                    <span id="adminBtnText">Masuk Admin</span>
+                </button>
+            </form>
+
+            <!-- Back Button -->
+            <div class="mt-6 text-center">
+                <button onclick="goBack()" class="btn-back w-full text-gray-700 font-semibold py-3 rounded-xl">
+                    ← Kembali ke Toko
+                </button>
+            </div>
+        </div>
+
+        <!-- Already Logged In Container -->
+        <div id="loggedInContainer" class="px-8 pb-8 hidden">
+            <div class="user-info p-6 rounded-xl mb-6">
+                <div class="flex items-center mb-4">
+                    <div class="avatar w-16 h-16 mr-4 relative">
+                        <img id="userPhoto" src="" alt="User Photo" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg">
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800" id="userName">Loading...</h3>
+                        <p class="text-sm text-gray-600" id="userEmail">Loading...</p>
+                        <span id="userType" class="inline-block mt-1 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-green-600" id="userCartItems">0</div>
+                        <div class="text-xs text-gray-600">Item Keranjang</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-green-600" id="userOrders">0</div>
+                        <div class="text-xs text-gray-600">Total Pesanan</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="goToDashboard()" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-all">
+                    📊 Dashboard
+                </button>
+                <button onclick="goToCart()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all">
+                    🛒 Lihat Keranjang
+                </button>
+                <button id="logoutBtn" class="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition-all">
+                    🚪 Logout
+                </button>
+                <button onclick="goBack()" class="w-full btn-back text-gray-700 font-semibold py-3 rounded-xl">
+                    ← Kembali ke Toko
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 50
+        });
+
+        // Admin credentials
+        const ADMIN_USERNAME = 'teluge@admin.app';
+        const ADMIN_PASSWORD = 'teluge2025';
+
+        // State management
+        let isInitialized = false;
+        let currentUser = null;
+
+        // Initialize when page loads
+        window.addEventListener('load', async () => {
+            try {
+                // Enable buttons after Firebase is loaded
+                document.getElementById('googleSignInBtn').disabled = false;
+                document.getElementById('loginForm').querySelector('button').disabled = false;
+                
+                // Check authentication state
+                onAuthStateChanged(firebaseAuth, handleAuthChange);
+                
+                // Check existing login
+                checkExistingLogin();
+                
+                isInitialized = true;
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast('Gagal memuat sistem login', 'error');
+            }
+        });
+
+        // Handle authentication state changes
+        async function handleAuthChange(user) {
+            if (user) {
+                currentUser = user;
+                await saveUserToFirestore(user);
+                await loadUserProfile();
+                showLoggedInContainer();
+            } else {
+                currentUser = null;
+                showLoginContainer();
+            }
+        }
+
+        // Save user to Firestore
+        async function saveUserToFirestore(user) {
+            try {
+                const userRef = doc(firebaseDb, 'users', user.uid);
+                const userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    lastLogin: new Date(),
+                    isActive: true
+                };
+
+                const userDoc = await getDoc(userRef);
+                if (!userDoc.exists()) {
+                    // New user
+                    userData.createdAt = new Date();
+                    userData.totalOrders = 0;
+                    userData.cartHistory = [];
+                    await setDoc(userRef, userData);
+                } else {
+                    // Existing user - update last login
+                    await updateDoc(userRef, {
+                        lastLogin: new Date(),
+                        isActive: true
+                    });
+                }
+            } catch (error) {
+                console.error('Error saving user:', error);
+            }
+        }
+
+        // Load user profile data
+        async function loadUserProfile() {
+            if (!currentUser) return;
+
+            try {
+                const userRef = doc(firebaseDb, 'users', currentUser.uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    // Update UI
+                    document.getElementById('userName').textContent = userData.displayName || 'User';
+                    document.getElementById('userEmail').textContent = userData.email;
+                    document.getElementById('userPhoto').src = userData.photoURL || 'https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg';
+                    document.getElementById('userOrders').textContent = userData.totalOrders || 0;
+                    
+                    // Load cart count
+                    const cart = JSON.parse(localStorage.getItem(`cart_${currentUser.uid}`)) || {};
+                    const cartCount = Object.values(cart).reduce((sum, item) => sum + (item.quantity || 0), 0);
+                    document.getElementById('userCartItems').textContent = cartCount;
+                    
+                    // Set user type
+                    const isAdmin = userData.email === ADMIN_USERNAME;
+                    document.getElementById('userType').textContent = isAdmin ? 'Admin' : 'Customer';
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+
+        // Google Sign-In
+        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+            if (!isInitialized) return;
+            
+            setGoogleLoading(true);
+            
+            try {
+                const result = await signInWithPopup(firebaseAuth, provider);
+                const user = result.user;
+
+                // Store login state
+                localStorage.setItem('userLoggedIn', 'true');
+                localStorage.setItem('userUID', user.uid);
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('userName', user.displayName);
+                localStorage.setItem('userPhoto', user.photoURL);
+
+                // Check if admin
+                if (user.email === ADMIN_USERNAME) {
+                    localStorage.setItem('adminLoggedIn', 'true');
+                }
+
+                showToast('Login berhasil! Selamat datang ' + user.displayName);
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    const redirectUrl = getRedirectUrl();
+                    if (redirectUrl && redirectUrl !== 'login.html') {
+                        window.location.href = redirectUrl;
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                showToast('Login Google gagal: ' + error.message, 'error');
+            } finally {
+                setGoogleLoading(false);
+            }
+        });
+
+        // Admin Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            setAdminLoading(true);
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                // Store admin login state
+                localStorage.setItem('adminLoggedIn', 'true');
+                localStorage.setItem('userLoggedIn', 'true');
+                localStorage.setItem('userEmail', username);
+                localStorage.setItem('userName', 'Admin TelugeAgro');
+                localStorage.setItem('userPhoto', 'https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg');
+                
+                showToast('Login admin berhasil!');
+                
+                setTimeout(() => {
+                    const redirectUrl = getRedirectUrl();
+                    if (redirectUrl && redirectUrl !== 'login.html') {
+                        window.location.href = redirectUrl;
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 1500);
+            } else {
+                showToast('Email atau password admin salah', 'error');
+            }
+            
+            setAdminLoading(false);
+        });
+
+        // Check existing login
+        function checkExistingLogin() {
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true' || localStorage.getItem('adminLoggedIn') === 'true';
+            
+            if (isLoggedIn && !currentUser) {
+                // Show logged in container with stored data
+                const userName = localStorage.getItem('userName') || 'User';
+                const userEmail = localStorage.getItem('userEmail') || '';
+                const userPhoto = localStorage.getItem('userPhoto') || 'https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg';
+                
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userEmail').textContent = userEmail;
+                document.getElementById('userPhoto').src = userPhoto;
+                
+                const isAdmin = localStorage.getItem('adminLoggedIn') === 'true';
+                document.getElementById('userType').textContent = isAdmin ? 'Admin' : 'Customer';
+                
+                // Load cart count
+                const userUID = localStorage.getItem('userUID') || 'guest';
+                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
+                const cartCount = Object.values(cart).reduce((sum, item) => sum + (item.quantity || 0), 0);
+                document.getElementById('userCartItems').textContent = cartCount;
+                
+                showLoggedInContainer();
+                showToast('Anda sudah login sebagai ' + userName);
+            }
+        }
+
+        // UI Management
+        function showLoginContainer() {
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('loggedInContainer').classList.add('hidden');
+        }
+
+        function showLoggedInContainer() {
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('loggedInContainer').classList.remove('hidden');
+        }
+
+        function setGoogleLoading(loading) {
+            const btn = document.getElementById('googleSignInBtn');
+            const icon = document.getElementById('googleIcon');
+            const text = document.getElementById('googleBtnText');
+            const loadingSpinner = document.getElementById('googleLoading');
+            
+            btn.disabled = loading;
+            icon.style.display = loading ? 'none' : 'block';
+            loadingSpinner.style.display = loading ? 'inline-block' : 'none';
+            text.textContent = loading ? 'Memproses...' : 'Masuk dengan Google';
+        }
+
+        function setAdminLoading(loading) {
+            const btn = document.getElementById('loginForm').querySelector('button');
+            const text = document.getElementById('adminBtnText');
+            const loadingSpinner = document.getElementById('adminLoading');
+            
+            btn.disabled = loading;
+            loadingSpinner.style.display = loading ? 'inline-block' : 'none';
+            text.textContent = loading ? 'Memproses...' : 'Masuk Admin';
+        }
+
+        // Navigation functions
+        function getRedirectUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('redirect') || 'index.html';
+        }
+
+        function goBack() {
+            const redirectUrl = getRedirectUrl();
+            if (redirectUrl && redirectUrl !== 'login.html') {
+                window.location.href = redirectUrl;
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function goToDashboard() {
+            window.location.href = 'profile.html';
+        }
+
+        function goToCart() {
+            window.location.href = 'cart.html';
+        }
+
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                // Sign out from Firebase if logged in with Google
+                if (currentUser) {
+                    await signOut(firebaseAuth);
+                }
+                
+                // Clear all login data
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userUID');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPhoto');
+                
+                showToast('Logout berhasil!');
+                
+                setTimeout(() => {
+                    showLoginContainer();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('Gagal logout', 'error');
+            }
+        });
+
+        // Toast function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
