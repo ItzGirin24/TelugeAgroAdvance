@@ -1313,12 +1313,24 @@
         async function logoutUser() {
             try {
                 await signOut(auth);
+                // Also clear localStorage for consistency with login.html
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPhoto');
                 showToast('Logout berhasil');
+                // Reload to update UI
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             } catch (error) {
                 console.error('Error signing out:', error);
                 showToast('Gagal logout', 'error');
             }
         }
+
+        // Make logoutUser global immediately
+        window.logoutUser = logoutUser;
 
         // Add activity to cart history
         function addToCartHistory(action, productName, quantity = 1) {
@@ -1813,12 +1825,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         function updateCartCount() {
-            let cartKey = 'cart'; // Default for non-logged in users
+            let totalItems = 0;
             if (userUID) {
-                cartKey = `cart_${userUID}`;
+                // User is logged in, use their specific cart
+                const cartKey = `cart_${userUID}`;
+                const cart = JSON.parse(localStorage.getItem(cartKey)) || {};
+                totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+            } else {
+                // User not logged in, cart count should be 0
+                // Optionally clear any existing cart data for non-logged in users
+                localStorage.removeItem('cart');
+                totalItems = 0;
             }
-            const cart = JSON.parse(localStorage.getItem(cartKey)) || {};
-            const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
 
             document.getElementById('cart-count').textContent = totalItems;
             document.getElementById('cart-count-mobile').textContent = totalItems;
@@ -1888,12 +1906,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         // Cart notification functions
-        function showCartNotification(quantity) {
+        function showCartNotification(productName, quantity) {
             const notification = document.getElementById('cart-notification');
             const notificationText = document.getElementById('cart-notification-text');
 
             // Update notification text
-            notificationText.textContent = `Keranjang Anda sekarang memiliki ${quantity} item${quantity > 1 ? 's' : ''}`;
+            notificationText.textContent = `${productName} ditambahkan ke keranjang! (${quantity} item${quantity > 1 ? 's' : ''})`;
 
             // Show notification
             notification.classList.add('show');

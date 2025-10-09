@@ -2,7 +2,7 @@
 
 ## Navigation UI Updates
 - [x] Replace login button in desktop navigation with auth-button-container HTML
-- [ ] Replace login link in mobile menu with auth-button-container HTML
+- [x] Replace login link in mobile menu with auth-button-container HTML
 
 ## Script Functions Addition/Modification
 - [ ] Add authentication check functions (checkUserLogin, getUserUID, redirectToLogin)
