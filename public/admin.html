@@ -93,9 +93,102 @@
          </div>
      </header>
 
-    <section class="py-16 bg-green-50"
+    <!-- Dashboard Statistics -->
+    <section class="py-8 bg-gradient-to-br from-green-50 to-green-100">
         <div class="container mx-auto px-4">
-            <h3 class="text-3xl font-semibold text-center text-green-800 mb-10">Order Management</h3>
+            <h2 class="text-3xl font-bold text-green-800 mb-6">📊 Dashboard Admin</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <!-- Total Orders -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-gray-600">Total Pesanan</h3>
+                        <span class="text-3xl">📦</span>
+                    </div>
+                    <p class="text-3xl font-bold text-blue-600" id="stat-total-orders">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Semua pesanan</p>
+                </div>
+
+                <!-- Pending Orders -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-orange-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-gray-600">Perlu Diproses</h3>
+                        <span class="text-3xl">⏳</span>
+                    </div>
+                    <p class="text-3xl font-bold text-orange-600" id="stat-pending-orders">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Menunggu proses</p>
+                </div>
+
+                <!-- Total Revenue -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-green-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-gray-600">Total Pendapatan</h3>
+                        <span class="text-3xl">💰</span>
+                    </div>
+                    <p class="text-2xl font-bold text-green-600" id="stat-total-revenue">Rp 0</p>
+                    <p class="text-xs text-gray-500 mt-1">Dari pesanan lunas</p>
+                </div>
+
+                <!-- Completed Orders -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-gray-600">Selesai</h3>
+                        <span class="text-3xl">✅</span>
+                    </div>
+                    <p class="text-3xl font-bold text-purple-600" id="stat-completed-orders">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Pesanan selesai</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Management Section -->
+    <section class="py-16 bg-green-50">
+        <div class="container mx-auto px-4">
+            <!-- Search and Filter Bar -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <h3 class="text-2xl font-bold text-green-800">Manajemen Pesanan</h3>
+                    
+                    <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                        <!-- Search Box -->
+                        <div class="relative flex-1 md:w-64">
+                            <input type="text" id="search-order" placeholder="Cari Order ID atau Email..." 
+                                class="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors">
+                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <select id="filter-status" class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors">
+                            <option value="">Semua Status</option>
+                            <option value="process">Proses</option>
+                            <option value="packing">Sedang Dikemas</option>
+                            <option value="shipping">Pengiriman</option>
+                            <option value="delivered">Sampai Tujuan</option>
+                            <option value="completed">Selesai</option>
+                            <option value="cancelled">Dibatalkan</option>
+                        </select>
+
+                        <!-- Payment Filter -->
+                        <select id="filter-payment" class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors">
+                            <option value="">Semua Pembayaran</option>
+                            <option value="paid">Sudah Bayar</option>
+                            <option value="pending">Belum Bayar</option>
+                        </select>
+
+                        <!-- Export Button -->
+                        <button onclick="exportToCSV()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders List -->
             <div id="orders-list" class="space-y-6">
                 <!-- Orders will be populated here -->
             </div>
@@ -393,6 +486,9 @@
             }, 3000);
         }
 
+        // Global variable to store all orders
+        let allOrders = [];
+
         async function loadOrders() {
             try {
                 const ordersQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
@@ -400,123 +496,34 @@
                 const ordersList = document.getElementById('orders-list');
                 ordersList.innerHTML = '';
 
+                allOrders = [];
                 let pendingCount = 0;
+                let completedCount = 0;
+                let totalRevenue = 0;
 
                 querySnapshot.forEach((doc) => {
                     const order = doc.data();
-                    const orderDiv = document.createElement('div');
-                    orderDiv.className = 'bg-white p-6 rounded-lg shadow-lg';
+                    allOrders.push({ id: doc.id, ...order });
+                    
                     const status = order.status || 'pending';
-                    const statusColor = status === 'completed' ? 'bg-green-100 text-green-800' :
-                                       status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                       status === 'process' ? 'bg-yellow-100 text-yellow-800' :
-                                       status === 'packing' ? 'bg-orange-100 text-orange-800' :
-                                       status === 'shipping' ? 'bg-blue-100 text-blue-800' :
-                                       status === 'delivered' ? 'bg-purple-100 text-purple-800' :
-                                       'bg-gray-100 text-gray-800';
-
-                    // Count pending orders
-                    if (status === 'pending') {
+                    
+                    // Count statistics
+                    if (status === 'process' || status === 'pending') {
                         pendingCount++;
                     }
-
-                    // Helper function to format address
-                    function formatAddress(order) {
-                        const addressFields = [
-                            order.shippingAddress,
-                            order.deliveryAddress,
-                            order.address,
-                            order.customerAddress
-                        ];
-
-                        for (const addr of addressFields) {
-                            if (addr) {
-                                if (typeof addr === 'string') {
-                                    return addr;
-                                } else if (typeof addr === 'object') {
-                                    const parts = [];
-                                    if (addr.street) parts.push(addr.street);
-                                    if (addr.city) parts.push(addr.city);
-                                    if (addr.province) parts.push(addr.province);
-                                    if (addr.postalCode) parts.push(addr.postalCode);
-                                    if (addr.country) parts.push(addr.country);
-                                    return parts.join(', ');
-                                }
-                            }
-                        }
-                        return 'N/A';
+                    if (status === 'completed' || status === 'delivered') {
+                        completedCount++;
                     }
-
-                    orderDiv.innerHTML = `
-                        <h4 class="text-xl font-bold text-green-700 mb-2">Order ID: ${doc.id}</h4>
-                        <p class="text-gray-600 mb-2">Customer: ${order.customerName || order.name}</p>
-                        <p class="text-gray-600 mb-2">Email: ${order.email}</p>
-                        <p class="text-gray-600 mb-2">Phone: ${order.phone || 'N/A'}</p>
-                        <p class="text-gray-600 mb-2">Address: ${formatAddress(order)}</p>
-                <p class="text-gray-600 mb-2">Total: Rp. ${order.total.toFixed(0)}</p>
-                <p class="text-gray-600 mb-2">Date: ${order.timestamp.toDate().toLocaleString()}</p>
-                        <p class="mb-4">
-                            <span class="inline-block px-2 py-1 rounded-full text-sm font-semibold ${statusColor}">
-                                ${status.charAt(0).toUpperCase() + status.slice(1)}
-                            </span>
-                        </p>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Update Status Pesanan:</label>
-                            <div class="flex gap-2 flex-wrap">
-                                <button onclick="updateOrderStatus('${doc.id}', 'process')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium">Proses</button>
-                                <button onclick="updateOrderStatus('${doc.id}', 'packing')" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm font-medium">Sedang Dikemas</button>
-                                <button onclick="updateOrderStatus('${doc.id}', 'shipping')" class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm font-medium">Pengiriman</button>
-                                <button onclick="updateOrderStatus('${doc.id}', 'delivered')" class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm font-medium">Sampai Tujuan</button>
-                                <button onclick="updateOrderStatus('${doc.id}', 'completed')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm font-medium">Selesai</button>
-                                <button onclick="updateOrderStatus('${doc.id}', 'cancelled')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm font-medium">Batal</button>
-                                <button onclick="deleteOrder('${doc.id}')" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Hapus</button>
-                            </div>
-                        </div>
-
-                        <!-- Payment Status Update Section -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Update Status Pembayaran:</label>
-                            <div class="flex gap-2 flex-wrap">
-                                <button onclick="updatePaymentStatus('${doc.id}', 'paid')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm font-medium flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Tandai Sudah Bayar
-                                </button>
-                                <button onclick="updatePaymentStatus('${doc.id}', 'pending')" class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-medium flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                    </svg>
-                                    Tandai Belum Bayar
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Payment Status Display -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Status Pembayaran Saat Ini:</label>
-                            <div class="flex items-center gap-2">
-                                <div class="w-3 h-3 rounded-full ${order.paymentStatus === 'paid' ? 'bg-green-500' : 'bg-orange-500'}"></div>
-                                <span class="text-sm font-medium ${order.paymentStatus === 'paid' ? 'text-green-700' : 'text-orange-700'}">
-                                    ${order.paymentStatus === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
-                                </span>
-                                ${order.paymentStatus === 'paid' ? '<span class="text-xs text-green-600 ml-2">✓ Pembayaran diterima</span>' : '<span class="text-xs text-orange-600 ml-2">Menunggu pembayaran</span>'}
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            ${order.items.map(item => `
-                                <div class="flex justify-between">
-                                    <span>${item.product} (x${item.quantity})</span>
-                                    <span>Rp. ${(item.price * item.quantity).toFixed(0)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    ordersList.appendChild(orderDiv);
+                    if (order.paymentStatus === 'paid') {
+                        totalRevenue += order.total || 0;
+                    }
                 });
 
-                // Update pending orders count
-                updatePendingOrdersCount(pendingCount);
+                // Update dashboard statistics
+                updateDashboardStats(allOrders.length, pendingCount, totalRevenue, completedCount);
+
+                // Render orders
+                renderOrders(allOrders);
             } catch (error) {
                 console.error('Error loading orders:', error);
                 document.getElementById('orders-list').innerHTML = '<p class="text-red-500">Error loading orders.</p>';
@@ -1028,6 +1035,319 @@
         document.getElementById('heroImageInput').addEventListener('input', function() {
             document.getElementById('heroImageDisplay').src = this.value;
         });
+
+        // Update Dashboard Statistics
+        function updateDashboardStats(total, pending, revenue, completed) {
+            document.getElementById('stat-total-orders').textContent = total;
+            document.getElementById('stat-pending-orders').textContent = pending;
+            document.getElementById('stat-total-revenue').textContent = `Rp ${formatPrice(revenue)}`;
+            document.getElementById('stat-completed-orders').textContent = completed;
+        }
+
+        // Render orders function with new UI
+        function renderOrders(orders) {
+            const ordersList = document.getElementById('orders-list');
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<div class="text-center py-12 text-gray-500"><p class="text-xl">Belum ada pesanan</p></div>';
+                return;
+            }
+
+            ordersList.innerHTML = orders.map((order) => {
+                const status = order.status || 'process';
+                const statusColor = status === 'completed' ? 'bg-green-100 text-green-800 border-green-500' :
+                                   status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-500' :
+                                   status === 'process' ? 'bg-yellow-100 text-yellow-800 border-yellow-500' :
+                                   status === 'packing' ? 'bg-orange-100 text-orange-800 border-orange-500' :
+                                   status === 'shipping' ? 'bg-blue-100 text-blue-800 border-blue-500' :
+                                   status === 'delivered' ? 'bg-purple-100 text-purple-800 border-purple-500' :
+                                   'bg-gray-100 text-gray-800 border-gray-500';
+
+                // Helper function to format address
+                function formatAddress(order) {
+                    const addressFields = [
+                        order.shippingAddress,
+                        order.deliveryAddress,
+                        order.address,
+                        order.customerAddress
+                    ];
+
+                    for (const addr of addressFields) {
+                        if (addr) {
+                            if (typeof addr === 'string') {
+                                return addr;
+                            } else if (typeof addr === 'object') {
+                                const parts = [];
+                                if (addr.street) parts.push(addr.street);
+                                if (addr.city) parts.push(addr.city);
+                                if (addr.province) parts.push(addr.province);
+                                if (addr.postalCode) parts.push(addr.postalCode);
+                                if (addr.country) parts.push(addr.country);
+                                return parts.join(', ');
+                            }
+                        }
+                    }
+                    return 'N/A';
+                }
+
+                return `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 ${statusColor.split(' ')[2]}">
+                        <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 class="text-xl font-bold text-green-700">Order ID: ${order.id}</h4>
+                                    <button onclick="copyToClipboard('${order.id}')" class="text-gray-400 hover:text-green-600 transition-colors" title="Copy Order ID">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </button>
+                                    <a href="profil.html?preview=${order.id}" target="_blank" class="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1" title="Preview as Customer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        Preview
+                                    </a>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600"><strong>Customer:</strong> ${order.customerName || order.name}</p>
+                                    <p class="text-gray-600"><strong>Email:</strong> ${order.email}</p>
+                                    <p class="text-gray-600"><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                                    <p class="text-gray-600"><strong>Date:</strong> ${order.timestamp.toDate().toLocaleString('id-ID')}</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${statusColor}">
+                                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                                </span>
+                                <span class="text-2xl font-bold text-green-600">Rp. ${order.total.toFixed(0)}</span>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-600 mb-4 text-sm"><strong>Address:</strong> ${formatAddress(order)}</p>
+
+                        <!-- Shipping Information Section -->
+                        <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                            <h5 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Informasi Pengiriman
+                            </h5>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Nama Kurir</label>
+                                    <input type="text" id="courier-${order.id}" value="${order.courierName || ''}" 
+                                        placeholder="JNE, TIKI, JNT, dll" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Nomor Resi</label>
+                                    <input type="text" id="tracking-${order.id}" value="${order.trackingNumber || ''}" 
+                                        placeholder="Masukkan no. resi" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Estimasi Tiba</label>
+                                    <input type="text" id="estimated-${order.id}" value="${order.estimatedDelivery || ''}" 
+                                        placeholder="2-3 hari" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <button onclick="updateShippingInfo('${order.id}')" 
+                                class="mt-3 w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Simpan Informasi Pengiriman
+                            </button>
+                        </div>
+
+                        <!-- Order Status Update Section -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Update Status Pesanan:</label>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="updateOrderStatus('${order.id}', 'process')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium">Proses</button>
+                                <button onclick="updateOrderStatus('${order.id}', 'packing')" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm font-medium">Sedang Dikemas</button>
+                                <button onclick="updateOrderStatus('${order.id}', 'shipping')" class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm font-medium">Pengiriman</button>
+                                <button onclick="updateOrderStatus('${order.id}', 'delivered')" class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm font-medium">Sampai Tujuan</button>
+                                <button onclick="updateOrderStatus('${order.id}', 'completed')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm font-medium">Selesai</button>
+                                <button onclick="updateOrderStatus('${order.id}', 'cancelled')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm font-medium">Batal</button>
+                                <button onclick="deleteOrder('${order.id}')" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Hapus</button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Status Update Section -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Update Status Pembayaran:</label>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="updatePaymentStatus('${order.id}', 'paid')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm font-medium flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Tandai Sudah Bayar
+                                </button>
+                                <button onclick="updatePaymentStatus('${order.id}', 'pending')" class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-medium flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    Tandai Belum Bayar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Status Display -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status Pembayaran Saat Ini:</label>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full ${order.paymentStatus === 'paid' ? 'bg-green-500' : 'bg-orange-500'}"></div>
+                                <span class="text-sm font-medium ${order.paymentStatus === 'paid' ? 'text-green-700' : 'text-orange-700'}">
+                                    ${order.paymentStatus === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
+                                </span>
+                                ${order.paymentStatus === 'paid' ? '<span class="text-xs text-green-600 ml-2">✓ Pembayaran diterima</span>' : '<span class="text-xs text-orange-600 ml-2">Menunggu pembayaran</span>'}
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="space-y-2">
+                            ${order.items.map(item => `
+                                <div class="flex justify-between text-sm bg-gray-50 p-2 rounded">
+                                    <span>${item.product} (x${item.quantity})</span>
+                                    <span>Rp. ${(item.price * item.quantity).toFixed(0)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update shipping information
+        async function updateShippingInfo(orderId) {
+            const courierName = document.getElementById(`courier-${orderId}`).value;
+            const trackingNumber = document.getElementById(`tracking-${orderId}`).value;
+            const estimatedDelivery = document.getElementById(`estimated-${orderId}`).value;
+
+            try {
+                await updateDoc(doc(db, 'orders', orderId), {
+                    courierName: courierName,
+                    trackingNumber: trackingNumber,
+                    estimatedDelivery: estimatedDelivery,
+                    updatedAt: new Date()
+                });
+                showToast('Informasi pengiriman berhasil diupdate', 'success');
+                
+                // Send notification email (EmailJS integration)
+                sendShippingNotification(orderId, courierName, trackingNumber, estimatedDelivery);
+            } catch (error) {
+                console.error('Error updating shipping info:', error);
+                showToast('Gagal update informasi pengiriman', 'error');
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Order ID berhasil disalin!', 'success');
+            }).catch(() => {
+                showToast('Gagal menyalin Order ID', 'error');
+            });
+        }
+
+        // Format price
+        function formatPrice(price) {
+            return new Intl.NumberFormat('id-ID').format(Math.round(price));
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            if (allOrders.length === 0) {
+                showToast('Tidak ada data untuk di-export', 'error');
+                return;
+            }
+
+            const csvRows = [];
+            const headers = ['Order ID', 'Customer Name', 'Email', 'Phone', 'Total', 'Status', 'Payment Status', 'Date', 'Tracking Number', 'Courier'];
+            csvRows.push(headers.join(','));
+
+            allOrders.forEach(order => {
+                const row = [
+                    order.id,
+                    order.customerName || order.name || '',
+                    order.email || '',
+                    order.phone || '',
+                    order.total || 0,
+                    order.status || 'pending',
+                    order.paymentStatus || 'pending',
+                    order.timestamp?.toDate().toLocaleDateString('id-ID') || '',
+                    order.trackingNumber || '',
+                    order.courierName || ''
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `orders_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showToast('Data berhasil di-export!', 'success');
+        }
+
+        // Send shipping notification via EmailJS
+        function sendShippingNotification(orderId, courier, tracking, estimated) {
+            // EmailJS integration will be added here
+            console.log('Sending notification for order:', orderId);
+            // You can integrate EmailJS here later
+        }
+
+        // Search and Filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-order');
+            const statusFilter = document.getElementById('filter-status');
+            const paymentFilter = document.getElementById('filter-payment');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', filterOrders);
+            }
+            if (statusFilter) {
+                statusFilter.addEventListener('change', filterOrders);
+            }
+            if (paymentFilter) {
+                paymentFilter.addEventListener('change', filterOrders);
+            }
+        });
+
+        function filterOrders() {
+            const searchTerm = document.getElementById('search-order')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('filter-status')?.value || '';
+            const paymentFilter = document.getElementById('filter-payment')?.value || '';
+
+            const filteredOrders = allOrders.filter(order => {
+                const matchesSearch = !searchTerm || 
+                    order.id.toLowerCase().includes(searchTerm) ||
+                    (order.email || '').toLowerCase().includes(searchTerm) ||
+                    (order.customerName || '').toLowerCase().includes(searchTerm);
+
+                const matchesStatus = !statusFilter || order.status === statusFilter;
+                const matchesPayment = !paymentFilter || order.paymentStatus === paymentFilter;
+
+                return matchesSearch && matchesStatus && matchesPayment;
+            });
+
+            renderOrders(filteredOrders);
+        }
+
+        // Make new functions global
+        window.updateShippingInfo = updateShippingInfo;
+        window.copyToClipboard = copyToClipboard;
+        window.exportToCSV = exportToCSV;
+        window.filterOrders = filterOrders;
+
 
         // Make functions global - ensure they are available immediately
         window.manageWeb = manageWeb;

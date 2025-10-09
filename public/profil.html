@@ -401,17 +401,19 @@
         async function loadUserStats() {
             try {
                 // Load cart count
-                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
+                const cart = JSON.parse(localStorage.getItem('cart')) || {};
                 const cartItems = Object.values(cart);
                 const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 document.getElementById('cartItemsCount').textContent = cartCount;
 
                 // Load order statistics from Firebase
                 if (window.firebaseDb) {
+                    const userEmail = localStorage.getItem('userEmail');
+                    if (!userEmail) return;
+
                     const ordersQuery = query(
                         collection(firebaseDb, 'orders'),
-                        where('customerUID', '==', userUID),
-                        orderBy('timestamp', 'desc')
+                        where('email', '==', userEmail)
                     );
 
                     const ordersSnapshot = await getDocs(ordersQuery);
@@ -474,7 +476,7 @@
             }
         }
 
-        // Load order history
+        // Load order history with real-time updates
         async function loadOrderHistory() {
             try {
                 const ordersContainer = document.getElementById('orders-container');
@@ -485,14 +487,25 @@
                     return;
                 }
 
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail) {
+                    ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Silakan login terlebih dahulu</p>';
+                    return;
+                }
+
+                // Show loading
+                ordersContainer.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div></div>';
+
                 const ordersQuery = query(
                     collection(firebaseDb, 'orders'),
-                    where('customerUID', '==', userUID),
-                    orderBy('timestamp', 'desc')
+                    where('email', '==', userEmail)
                 );
 
                 const ordersSnapshot = await getDocs(ordersQuery);
                 const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Sort by timestamp desc
+                orders.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
 
                 if (orders.length === 0) {
                     ordersContainer.innerHTML = '';
@@ -502,42 +515,225 @@
 
                 ordersEmpty.classList.add('hidden');
 
-                ordersContainer.innerHTML = orders.map(order => `
-                    <div class="order-item bg-white rounded-xl p-6 mb-4 border border-gray-200">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Order #${order.id.slice(-8)}</h3>
-                                <p class="text-sm text-gray-600">${order.timestamp.toDate().toLocaleDateString('id-ID', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}</p>
+                ordersContainer.innerHTML = orders.map(order => {
+                    const statusInfo = getOrderStatusInfo(order.status || 'process');
+                    return `
+                    <div class="order-item bg-white rounded-xl p-6 mb-4 border-l-4 ${statusInfo.borderColor} shadow-md hover:shadow-xl transition-all duration-300" data-order-id="${order.id}">
+                        <!-- Order Header -->
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h3 class="font-bold text-lg text-gray-800">Order #${order.id.slice(-8).toUpperCase()}</h3>
+                                    <button onclick="copyOrderId('${order.id}')" class="text-gray-400 hover:text-green-600 transition-colors" title="Copy Order ID">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-sm text-gray-600 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    ${order.timestamp?.toDate().toLocaleDateString('id-ID', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </p>
                             </div>
-                            <span class="status-badge ${getStatusClass(order.status)}">${getStatusText(order.status)}</span>
+                            <div class="flex flex-col gap-2 items-end">
+                                <span class="status-badge ${statusInfo.bgColor} ${statusInfo.textColor} flex items-center gap-2">
+                                    ${statusInfo.icon} ${statusInfo.text}
+                                </span>
+                                <span class="status-badge ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'} text-xs">
+                                    ${order.paymentStatus === 'paid' ? '✓ Sudah Bayar' : '⏳ Belum Bayar'}
+                                </span>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <!-- Progress Timeline -->
+                        <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-3">Progress Pengiriman</h4>
+                            <div class="relative">
+                                <div class="flex justify-between items-center mb-2">
+                                    ${['process', 'packing', 'shipping', 'delivered'].map((step, index) => {
+                                        const stepInfo = getOrderStatusInfo(step);
+                                        const currentStep = ['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process');
+                                        const isActive = index <= currentStep;
+                                        return `
+                                        <div class="flex flex-col items-center flex-1">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'} font-bold text-sm mb-1 transition-all duration-300">
+                                                ${isActive ? '✓' : index + 1}
+                                            </div>
+                                            <span class="text-xs ${isActive ? 'text-green-600 font-semibold' : 'text-gray-500'} text-center">${stepInfo.shortText}</span>
+                                        </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                                <div class="relative h-1 bg-gray-300 rounded-full -mt-5 mb-8 mx-4">
+                                    <div class="absolute h-1 bg-green-500 rounded-full transition-all duration-500" style="width: ${(['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process') + 1) * 25}%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Shipping Info -->
+                            ${order.trackingNumber ? `
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                                    <div>
+                                        <span class="text-gray-600">Kurir:</span>
+                                        <span class="font-semibold text-gray-800 ml-1">${order.courierName || '-'}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">No. Resi:</span>
+                                        <span class="font-semibold text-gray-800 ml-1">${order.trackingNumber}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">Estimasi:</span>
+                                        <span class="font-semibold text-gray-800 ml-1">${order.estimatedDelivery || '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Order Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <p class="text-sm font-medium text-gray-700 mb-2">Produk:</p>
-                                ${order.items.map(item => `
-                                    <p class="text-sm text-gray-600">• ${item.product} (${item.quantity}kg)</p>
-                                `).join('')}
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Produk Pesanan</h4>
+                                <div class="space-y-2">
+                                    ${order.items?.map(item => `
+                                        <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
+                                            <span class="text-gray-700">${item.product}</span>
+                                            <span class="text-gray-600">${item.quantity}kg × Rp ${formatPrice(item.price)}</span>
+                                        </div>
+                                    `).join('') || ''}
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-bold text-green-600">Rp ${formatPrice(order.total)}</p>
-                                <button onclick="viewOrderDetails('${order.id}')" class="mt-2 text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                    Lihat Detail
-                                </button>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Alamat Pengiriman</h4>
+                                <p class="text-sm text-gray-600 mb-4">${formatAddress(order)}</p>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-600 mb-1">Total Pembayaran</p>
+                                    <p class="text-3xl font-bold text-green-600">Rp ${formatPrice(order.total)}</p>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
+                            <button onclick="viewOrderDetails('${order.id}')" class="flex-1 md:flex-none bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Lihat Detail
+                            </button>
+                            <button onclick="downloadReceipt('${order.id}')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download
+                            </button>
+                            <button onclick="trackOrder('${order.id}')" class="flex-1 md:flex-none bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Lacak Pesanan
+                            </button>
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
 
             } catch (error) {
                 console.error('Error loading order history:', error);
                 document.getElementById('orders-container').innerHTML = '<p class="text-red-500 text-center">Gagal memuat riwayat pesanan</p>';
             }
+        }
+
+        // Helper function to format address
+        function formatAddress(order) {
+            const addressFields = [
+                order.shippingAddress,
+                order.deliveryAddress,
+                order.address,
+                order.customerAddress
+            ];
+
+            for (const addr of addressFields) {
+                if (addr) {
+                    if (typeof addr === 'string') {
+                        return addr;
+                    } else if (typeof addr === 'object') {
+                        const parts = [];
+                        if (addr.street) parts.push(addr.street);
+                        if (addr.city) parts.push(addr.city);
+                        if (addr.province) parts.push(addr.province);
+                        if (addr.postalCode) parts.push(addr.postalCode);
+                        if (addr.country) parts.push(addr.country);
+                        return parts.join(', ');
+                    }
+                }
+            }
+            return 'Alamat tidak tersedia';
+        }
+
+        // Get order status info
+        function getOrderStatusInfo(status) {
+            const statusMap = {
+                'process': {
+                    text: 'Diproses',
+                    shortText: 'Proses',
+                    icon: '⏳',
+                    bgColor: 'bg-blue-100',
+                    textColor: 'text-blue-800',
+                    borderColor: 'border-blue-500'
+                },
+                'packing': {
+                    text: 'Sedang Dikemas',
+                    shortText: 'Dikemas',
+                    icon: '📦',
+                    bgColor: 'bg-yellow-100',
+                    textColor: 'text-yellow-800',
+                    borderColor: 'border-yellow-500'
+                },
+                'shipping': {
+                    text: 'Dalam Pengiriman',
+                    shortText: 'Dikirim',
+                    icon: '🚚',
+                    bgColor: 'bg-purple-100',
+                    textColor: 'text-purple-800',
+                    borderColor: 'border-purple-500'
+                },
+                'delivered': {
+                    text: 'Sampai Tujuan',
+                    shortText: 'Sampai',
+                    icon: '✅',
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-500'
+                },
+                'completed': {
+                    text: 'Selesai',
+                    shortText: 'Selesai',
+                    icon: '🎉',
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-500'
+                },
+                'cancelled': {
+                    text: 'Dibatalkan',
+                    shortText: 'Batal',
+                    icon: '❌',
+                    bgColor: 'bg-red-100',
+                    textColor: 'text-red-800',
+                    borderColor: 'border-red-500'
+                }
+            };
+            return statusMap[status] || statusMap['process'];
         }
 
         // Tab management
@@ -673,8 +869,30 @@
 
         // Navigation functions
         function viewOrderDetails(orderId) {
-            // Redirect to order details page or show modal
-            showToast('Fitur detail pesanan akan segera hadir');
+            // Redirect to pesanan.html with order ID
+            window.location.href = `pesanan.html?orderId=${orderId}`;
+        }
+
+        function trackOrder(orderId) {
+            // Redirect to tracking page
+            window.location.href = `pesanan.html?orderId=${orderId}`;
+        }
+
+        function downloadReceipt(orderId) {
+            showToast('Mengunduh receipt...', 'success');
+            
+            // Simple receipt download (you can enhance this with jsPDF)
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        function copyOrderId(orderId) {
+            navigator.clipboard.writeText(orderId).then(() => {
+                showToast('Order ID berhasil disalin!', 'success');
+            }).catch(() => {
+                showToast('Gagal menyalin Order ID', 'error');
+            });
         }
 
         function logout() {

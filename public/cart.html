@@ -376,15 +376,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Authentication Check -->
-    <script>
-        // Check if user is logged in
-        if (!localStorage.getItem('adminLoggedIn') && !localStorage.getItem('userLoggedIn')) {
-            // Redirect to login page with current page as redirect parameter
-            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-            window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
-        }
-    </script>
+    <!-- Firebase Auth will handle authentication check -->
 
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
@@ -769,6 +761,11 @@
         // Firebase SDK imports
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import {
+            getAuth,
+            onAuthStateChanged,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+        import {
             getFirestore,
             collection,
             getDocs,
@@ -793,11 +790,33 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // Global Variables
         let cartItems = {};
         let allProducts = [];
         let appliedPromo = null;
+        let currentUser = null;
+        let userUID = null;
+
+        // Authentication check - redirect if not logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                currentUser = user;
+                userUID = user.uid;
+                console.log('User logged in:', user.email);
+                
+                // Load cart and data after auth is confirmed
+                loadCart();
+                loadProducts();
+                loadPurchaseHistory();
+            } else {
+                // No user is signed in, redirect to login
+                const currentPage = window.location.pathname.split('/').pop() || 'cart.html';
+                window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+            }
+        });
 
         // Save order to Firebase
         async function saveOrderToFirebase(orderData) {
@@ -909,15 +928,14 @@ const response = await fetch('/api/get-snap-token', {
         // Load purchase history
         async function loadPurchaseHistory() {
             try {
-                const customerEmail = localStorage.getItem('customerEmail');
-                if (!customerEmail) {
+                if (!userUID) {
                     document.getElementById('purchase-history-container').innerHTML = '<p class="text-sm text-gray-500 text-center">Belum ada riwayat pembelian</p>';
                     return;
                 }
 
                 const ordersQuery = query(
                     collection(db, 'orders'),
-                    where('email', '==', customerEmail),
+                    where('customerUID', '==', userUID),
                     orderBy('timestamp', 'desc'),
                     limit(3)
                 );
@@ -960,10 +978,7 @@ const response = await fetch('/api/get-snap-token', {
                 document.getElementById('loading-screen').style.opacity = '0';
                 setTimeout(function() {
                     document.getElementById('loading-screen').style.display = 'none';
-                    loadCart();
-                    loadProducts();
-                    loadPurchaseHistory();
-
+                    
                     // Check for payment callback in URL params
                     const urlParams = new URLSearchParams(window.location.search);
                     const status = urlParams.get('status');
@@ -985,24 +1000,32 @@ const response = await fetch('/api/get-snap-token', {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Load Cart from LocalStorage
+        // Load Cart from LocalStorage (user-specific)
         function loadCart() {
-            // Check if user is logged in, if not, clear cart
-            const isLoggedIn = localStorage.getItem('adminLoggedIn') || localStorage.getItem('userLoggedIn');
-            if (!isLoggedIn) {
+            if (!userUID) {
+                console.log('No user UID, cannot load cart');
                 cartItems = {};
-                localStorage.removeItem('cart');
-            } else {
-                const cartData = localStorage.getItem('cart');
-                cartItems = JSON.parse(cartData) || {};
+                return;
             }
+            
+            const cartKey = `cart_${userUID}`;
+            const cartData = localStorage.getItem(cartKey);
+            cartItems = JSON.parse(cartData) || {};
+            console.log('Cart loaded for user:', userUID, cartItems);
             renderCart();
             updateCartUI();
         }
 
-        // Save Cart to LocalStorage
+        // Save Cart to LocalStorage (user-specific)
         function saveCart() {
-            localStorage.setItem('cart', JSON.stringify(cartItems));
+            if (!userUID) {
+                console.log('No user UID, cannot save cart');
+                return;
+            }
+            
+            const cartKey = `cart_${userUID}`;
+            localStorage.setItem(cartKey, JSON.stringify(cartItems));
+            console.log('Cart saved for user:', userUID);
             updateCartUI();
         }
 
@@ -1229,6 +1252,7 @@ const response = await fetch('/api/get-snap-token', {
             const total = subtotal - discount;
 
             const orderData = {
+                customerUID: userUID,
                 customerName: name,
                 name: name,
                 email: email,
@@ -1253,8 +1277,9 @@ const response = await fetch('/api/get-snap-token', {
                 const orderId = await saveOrderToFirebase(orderData);
                 console.log('Order saved successfully:', orderId);
 
-                // Store customer email for order tracking
-                localStorage.setItem('customerEmail', orderData.email);
+                // Clear cart after successful order
+                cartItems = {};
+                saveCart();
 
                 // Close checkout modal
                 document.getElementById('checkout-modal').classList.add('hidden');
