@@ -1450,6 +1450,15 @@
             }
         }
 
+        // Check login status and hide login buttons if logged in
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true' || localStorage.getItem('adminLoggedIn') === 'true';
+            const loginButtons = document.querySelectorAll('button[onclick*="login.html"], a[href="login.html"]');
+            loginButtons.forEach(btn => {
+                btn.style.display = isLoggedIn ? 'none' : '';
+            });
+        }
+
         // Show admin menu
         function showAdminMenu() {
             document.getElementById('adminMenu').classList.remove('hidden');
@@ -1519,27 +1528,10 @@
             showToast('Logout berhasil');
         }
 
-        // Get cart key based on login status
-        function getCartKey() {
-            if (localStorage.getItem('userLoggedIn') === 'true') {
-                const email = localStorage.getItem('userEmail');
-                return 'cart_' + email;
-            } else if (localStorage.getItem('adminLoggedIn') === 'true') {
-                return 'cart_admin';
-            } else {
-                return null;
-            }
-        }
+
 
         // Cart functions
         function addToCart(productName, price, button) {
-            // Check if user is logged in
-            const cartKey = getCartKey();
-            if (!cartKey) {
-                showToast('Silakan login terlebih dahulu untuk menambah ke keranjang', 'error');
-                return;
-            }
-
             const card = button.closest('.product-card');
             const quantityInput = card.querySelector('.quantity-input');
             const quantity = parseInt(quantityInput.value) || 1;
@@ -1547,7 +1539,7 @@
             const image = img ? img.src : '';
 
             // Get existing cart
-            let cart = JSON.parse(localStorage.getItem(cartKey)) || {};
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
             // Add or update item
             if (cart[productName]) {
@@ -1562,7 +1554,7 @@
             }
 
             // Save cart
-            localStorage.setItem(cartKey, JSON.stringify(cart));
+            localStorage.setItem('cart', JSON.stringify(cart));
 
             // Update cart count
             updateCartCount();
@@ -1587,8 +1579,7 @@
         }
 
         function updateCartCount() {
-            const cartKey = getCartKey();
-            const cart = cartKey ? JSON.parse(localStorage.getItem(cartKey)) || {} : {};
+            const cart = JSON.parse(localStorage.getItem('cart')) || {};
             const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
 
             document.getElementById('cart-count').textContent = totalItems;
