@@ -1251,6 +1251,7 @@
         let currentUser = null;
         let userUID = null;
         let isUserLoggedIn = false;
+        let cartItems = {};
 
         // Auth state listener
         onAuthStateChanged(auth, (user) => {
@@ -1756,14 +1757,23 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Cart functions
         function addToCart(productName, price, button) {
+            // Check if user is logged in
+            if (!checkUserLogin()) {
+                redirectToLogin();
+                return;
+            }
+
             const card = button.closest('.product-card');
             const quantityInput = card.querySelector('.quantity-input');
             const quantity = parseInt(quantityInput.value) || 1;
             const img = card.querySelector('img');
             const image = img ? img.src : '';
 
+            // Get user-specific cart key
+            const cartKey = `cart_${getUserUID()}`;
+
             // Get existing cart
-            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let cart = JSON.parse(localStorage.getItem(cartKey)) || {};
 
             // Add or update item
             if (cart[productName]) {
@@ -1778,7 +1788,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             // Save cart
-            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem(cartKey, JSON.stringify(cart));
 
             // Update cart count
             updateCartCount();
@@ -1797,15 +1807,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             quantityInput.value = 1;
 
             // Show cart notification
-            showCartNotification(quantity);
+            showCartNotification(productName, quantity);
 
             showToast(`${productName} ditambahkan ke keranjang!`);
         }
 
         function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let cartKey = 'cart'; // Default for non-logged in users
+            if (userUID) {
+                cartKey = `cart_${userUID}`;
+            }
+            const cart = JSON.parse(localStorage.getItem(cartKey)) || {};
             const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-            
+
             document.getElementById('cart-count').textContent = totalItems;
             document.getElementById('cart-count-mobile').textContent = totalItems;
             document.getElementById('cart-count-float').textContent = totalItems;
@@ -2207,6 +2221,3 @@ function updateCartDisplay() {
     </script>
 </body>
 </html>
-
-
-
