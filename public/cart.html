@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelugeAgro - Keranjang Belanja</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-ZbcAdH6rPFR6ez8i"></script>
+
+    <script>
+        // Initialize EmailJS
+        (function(){
+            emailjs.init("sFdQfCubtceDeQ0i3"); // Replace with your EmailJS User ID
+        })();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16a34a;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #22c55e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: progress-shine 2s infinite;
+        }
+        
+        @keyframes progress-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Cart Item Animations */
+        .cart-item {
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.1);
+        }
+        
+        .cart-item.removing {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        /* Quantity Control */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-control:focus-within {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+        
+        .quantity-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .quantity-btn:hover {
+            background: #16a34a;
+            transform: scale(1.05);
+        }
+        
+        .quantity-input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 50px;
+            height: 36px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Total Summary */
+        .total-summary {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Checkout Button */
+        .checkout-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .checkout-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(251, 191, 36, 0.4);
+        }
+        
+        .checkout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .checkout-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Form Inputs */
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+            outline: none;
+        }
+
+        /* Empty Cart Animation */
+        .empty-cart {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Payment Success Animation */
+        .payment-success {
+            animation: successPulse 0.6s ease-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            animation: confetti-fall linear;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        /* Cart Float Button */
+        .cart-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 210px;
+            right: 20px;
+            background-color: #22c55e;
+            color: white;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 24px;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .cart-float:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 2px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .cart-float .cart-count-float {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        /* WhatsApp Float Button */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 100px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+            text-decoration: none;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 2px 15px rgba(37, 211, 102, 0.4);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Toast Animation */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal {
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .whatsapp-float { bottom: 140px; right: 16px; }
+            .toast { top: 16px; right: 16px; left: 16px; width: auto; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Authentication Check -->
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('adminLoggedIn') && !localStorage.getItem('userLoggedIn')) {
+            // Redirect to login page with current page as redirect parameter
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+        }
+    </script>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <h3 class="text-xl font-semibold text-gray-700">Memuat Keranjang...</h3>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <img src="logo Teluge.jpg" alt="TelugeAgro Logo" class="w-10 h-10 md:w-12 md:h-12 rounded-full">
+                    <span class="text-xl md:text-2xl font-bold text-gray-800">TelugeAgro</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="leadingpage.html" class="text-gray-700 hover:text-green-600 transition-colors duration-300 font-medium">Beranda</a>
+                    <a href="store.html" class="text-gray-700 hover:text-green-600 transition-colors duration-300 font-medium">Toko</a>
+                    <a href="leadingpage.html#about" class="text-gray-700 hover:text-green-600 transition-colors duration-300 font-medium">Tentang</a>
+                    <a href="leadingpage.html#contact" class="text-gray-700 hover:text-green-600 transition-colors duration-300 font-medium">Kontak</a>
+                    
+                    <!-- Cart Icon -->
+                    <div class="relative text-green-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+                        </svg>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">0</span>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700 hover:text-green-600 transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="leadingpage.html" class="block px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded transition-colors duration-300">Beranda</a>
+                <a href="store.html" class="block px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded transition-colors duration-300">Toko</a>
+                <a href="leadingpage.html#about" class="block px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded transition-colors duration-300">Tentang</a>
+                <a href="leadingpage.html#contact" class="block px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded transition-colors duration-300">Kontak</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 33%"></div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white py-4 border-b">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex items-center space-x-2 text-sm">
+                <a href="store.html" class="text-green-600 hover:text-green-700 transition-colors duration-300">Toko</a>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <span class="text-gray-700 font-medium">Keranjang Belanja</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8" data-aos="fade-down">
+                <div class="flex items-center justify-center mb-4">
+                    <img src="logo Teluge.jpg" alt="TelugeAgro Logo" class="w-12 h-12 md:w-16 md:h-16 rounded-full mr-3">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
+                        Keranjang Belanja
+                        <span id="header-cart-count" class="text-green-600 text-2xl md:text-3xl">(<span id="header-cart-number">0</span>)</span>
+                    </h1>
+                </div>
+                <p class="text-lg text-gray-600">Review produk pilihan Anda sebelum melakukan pemesanan</p>
+            </div>
+
+            <!-- Cart Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Cart Items -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6" data-aos="fade-right">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Produk dalam Keranjang</h2>
+                        
+                        <!-- Cart Items Container -->
+                        <div id="cart-items-container">
+                            <!-- Items will be loaded here -->
+                        </div>
+
+                        <!-- Empty Cart State -->
+                        <div id="empty-cart" class="text-center py-12 hidden">
+                            <div class="empty-cart mb-6">
+                                <div class="text-8xl mb-4">🛒</div>
+                                <h3 class="text-2xl font-bold text-gray-700 mb-2">Keranjang Masih Kosong</h3>
+                                <p class="text-gray-500 mb-6">Yuk mulai belanja pisang premium kami!</p>
+                                <a href="store.html" class="inline-flex items-center bg-green-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all duration-300">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                    </svg>
+                                    Mulai Belanja
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Continue Shopping -->
+                        <div id="continue-shopping" class="border-t pt-6 hidden">
+                            <a href="store.html" class="inline-flex items-center text-green-600 hover:text-green-700 font-medium transition-colors duration-300">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                                Lanjut Belanja
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tutorial Cara Pemesanan -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6" data-aos="fade-right" data-aos-delay="100">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            Tutorial Cara Pemesanan
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Pilih Produk</h4>
+                                    <p class="text-sm text-gray-600">Kunjungi halaman toko dan pilih produk pisang yang Anda inginkan.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Tambahkan ke Keranjang</h4>
+                                    <p class="text-sm text-gray-600">Klik tombol "Tambah ke Keranjang" dan atur jumlah yang diinginkan.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Periksa Keranjang</h4>
+                                    <p class="text-sm text-gray-600">Review produk dalam keranjang, sesuaikan jumlah jika perlu.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Isi Data Pembeli</h4>
+                                    <p class="text-sm text-gray-600">Lengkapi nama, email, nomor WhatsApp, dan alamat pengiriman.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">5</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Lakukan Pembayaran</h4>
+                                    <p class="text-sm text-gray-600">Konfirmasi pesanan dan lakukan pembayaran melalui WhatsApp.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-sm text-blue-800 font-medium">Butuh bantuan? Hubungi kami via WhatsApp untuk panduan lebih detail.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6" data-aos="fade-right" data-aos-delay="200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Rekomendasi Produk</h3>
+                        <div id="recommendations-container" class="grid md:grid-cols-2 gap-4">
+                            <!-- Recommendations will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-24">
+                        <div class="total-summary mb-6" data-aos="fade-left">
+                            <h3 class="text-2xl font-bold mb-6">Ringkasan Pesanan</h3>
+                            
+                            <div class="space-y-4 mb-6">
+                                <div class="flex justify-between">
+                                    <span>Subtotal:</span>
+                                    <span id="subtotal">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between text-sm text-green-200">
+                                    <span>Diskon:</span>
+                                    <span id="discount">- Rp 0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Ongkos Kirim:</span>
+                                    <span id="shipping-cost">Ongkir Akan dikonfirmasi oleh Admin lewat Whatshapp</span>
+                                </div>
+                                <div class="border-t border-green-400 pt-4">
+                                    <div class="flex justify-between text-xl font-bold">
+                                        <span>Total:</span>
+                                        <span id="total-amount">Rp 0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Checkout Button -->
+                            <button id="checkout-btn" class="checkout-btn w-full bg-yellow-400 text-green-800 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                🚀 Lanjut ke Pembayaran
+                            </button>
+
+                            <!-- Security Badges -->
+                            <div class="mt-6 flex items-center justify-center space-x-4">
+                                <div class="flex items-center text-green-200 text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                    Pembayaran Aman
+                                </div>
+                                <div class="flex items-center text-green-200 text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Garansi Kualitas
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Promo Code -->
+                        <div class="bg-white rounded-2xl shadow-lg p-6" data-aos="fade-left" data-aos-delay="200">
+                            <h4 class="font-bold text-gray-800 mb-3">Kode Promo</h4>
+                            <div class="flex gap-2">
+                                <input type="text" id="promo-code" placeholder="Masukkan kode promo" class="flex-1 form-input py-3 text-sm">
+                                <button onclick="applyPromo()" class="bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition-colors duration-300 font-medium">
+                                    Terapkan
+                                </button>
+                            </div>
+                            <div class="mt-3 text-sm text-gray-500">
+                                🎉 Gunakan kode <strong>COMINGSOON</strong> untuk diskon 10%
+                            </div>
+                        </div>
+
+                        <!-- Riwayat Pembelian -->
+                        <div class="bg-white rounded-2xl shadow-lg p-6" data-aos="fade-left" data-aos-delay="300">
+                            <h4 class="font-bold text-gray-800 mb-3">Riwayat Pembelian</h4>
+                            <div id="purchase-history-container">
+                                <!-- Purchase history will be loaded here -->
+                                <div class="text-center py-4">
+                                    <div class="text-gray-400 mb-2">📦</div>
+                                    <p class="text-sm text-gray-500">Memuat riwayat pembelian...</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <a href="pesanan.html" class="text-green-600 hover:text-green-700 text-sm font-medium transition-colors duration-300">
+                                    Lihat Semua Pesanan →
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">📋 Data Pembeli</h3>
+            <form id="customer-form" class="space-y-6">
+                <div>
+                    <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
+                    <input type="text" id="customer-name" required class="form-input" placeholder="Masukkan nama lengkap">
+                </div>
+                <div>
+                    <label for="customer-email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" id="customer-email" required class="form-input" placeholder="contoh@email.com">
+                </div>
+                <div>
+                    <label for="customer-phone" class="block text-sm font-medium text-gray-700 mb-2">Nomor WhatsApp *</label>
+                    <input type="tel" id="customer-phone" required class="form-input" placeholder="08123456789">
+                </div>
+                <div>
+                    <label for="customer-address" class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap *</label>
+                    <textarea id="customer-address" required class="form-input h-24 resize-none" placeholder="Jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kota, provinsi"></textarea>
+                </div>
+                <div>
+                    <label for="customer-notes" class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
+                    <textarea id="customer-notes" class="form-input h-20 resize-none" placeholder="Catatan khusus untuk pesanan Anda"></textarea>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" id="cancel-checkout" class="flex-1 bg-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-300">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-4 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-300">
+                        💳 Bayar Sekarang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="logo Teluge.jpg" alt="TelugeAgro Logo" class="w-12 h-12 rounded-full">
+                        <span class="text-2xl font-bold">TelugeAgro</span>
+                    </div>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        Keranjang belanja pisang premium dari Purworejo, Jawa Tengah. Belanja mudah, pembayaran aman, kualitas terjamin.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Menu</h3>
+                    <ul class="space-y-2">
+                        <li><a href="leadingpage.html" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Beranda</a></li>
+                        <li><a href="store.html" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Toko</a></li>
+                        <li><a href="leadingpage.html#about" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Tentang</a></li>
+                        <li><a href="leadingpage.html#contact" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Kontak</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Kontak</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>📍 Purworejo, Jawa Tengah</li>
+                        <li>📱 +62 811-2638-318</li>
+                        <li>✉️ teluge.agro@gmail.com</li>
+                        <li>🕒 24/7 Customer Support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">© 2017 TelugeAgro. Semua hak dilindungi undang-undang.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Float Button -->
+    <div class="cart-float" onclick="window.location.href='cart.html'" title="Lihat Keranjang">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+        </svg>
+        <span id="cart-count-float" class="cart-count-float">0</span>
+    </div>
+
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/628112638318?text=Halo%20TelugeAgro,%20saya%20butuh%20bantuan%20dengan%20pesanan%20saya!"
+       class="whatsapp-float"
+       target="_blank"
+       rel="noopener noreferrer"
+       title="Bantuan WhatsApp">
+        📱
+    </a>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Firebase and Scripts -->
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            query,
+            orderBy,
+            addDoc,
+            updateDoc,
+            doc,
+            where,
+            limit
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
+            authDomain: "telugeagro2025.firebaseapp.com",
+            projectId: "telugeagro2025",
+            storageBucket: "telugeagro2025.firebasestorage.app",
+            messagingSenderId: "1029963109637",
+            appId: "1:1029963109637:web:86824d0db45e1489b3136c",
+            measurementId: "G-XF1JDPME66"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Global Variables
+        let cartItems = {};
+        let allProducts = [];
+        let appliedPromo = null;
+
+        // Save order to Firebase
+        async function saveOrderToFirebase(orderData) {
+            try {
+                const docRef = await addDoc(collection(db, 'orders'), orderData);
+                return docRef.id;
+            } catch (error) {
+                console.error('Error saving order:', error);
+                throw error;
+            }
+        }
+
+        // Get Snap Token from server
+// Get Snap Token from server
+async function getSnapToken(transactionData) {
+  try {
+const response = await fetch('/api/get-snap-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transactionData)
+    });
+
+    const result = await response.json(); // ⬅️ Tambahkan ini
+    console.log('📦 Data dikirim ke server:', transactionData);
+    console.log('📩 Respon dari server:', result);
+
+    if (result.token) {
+      return result.token;
+    } else {
+      throw new Error(result.error || 'Failed to get snap token');
+    }
+  } catch (error) {
+    console.error('Error getting snap token:', error);
+    throw error;
+  }
+}
+
+
+        // Load products for recommendations
+        async function loadProducts() {
+            try {
+                const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(productsQuery);
+
+                allProducts = [];
+                querySnapshot.forEach((doc) => {
+                    const productData = doc.data();
+                    allProducts.push({
+                        id: doc.id,
+                        ...productData
+                    });
+                });
+
+                loadRecommendations();
+                // Re-render cart with Firebase images after products are loaded
+                if (Object.keys(cartItems).length > 0) {
+                    renderCart();
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Load recommendations
+        function loadRecommendations() {
+            const container = document.getElementById('recommendations-container');
+            if (allProducts.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-2">Tidak ada rekomendasi produk</p>';
+                return;
+            }
+
+            // Only show featured products
+            const featuredProducts = allProducts.filter(product => product.featured === true);
+
+            if (featuredProducts.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-2">Tidak ada produk unggulan untuk direkomendasikan</p>';
+                return;
+            }
+
+            // Take up to 4 featured products
+            const recommendations = featuredProducts.slice(0, 4);
+
+            container.innerHTML = recommendations.map(product => `
+                <div class="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl hover:border-green-300 transition-colors duration-300">
+                    <img src="${product.image}" alt="${product.title}" class="w-16 h-16 object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/64x64?text=No+Image'">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${product.title}</h4>
+                        <p class="text-sm text-gray-600">Rp ${formatPrice(product.price)}/kg</p>
+                        <button class="text-green-600 text-sm font-medium hover:text-green-700 transition-colors duration-300" onclick="addRecommendation('${product.title}', ${product.price})">+ Tambah</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility function to format price
+        function formatPrice(price) {
+            return new Intl.NumberFormat('id-ID').format(Math.round(price));
+        }
+
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Load purchase history
+        async function loadPurchaseHistory() {
+            try {
+                const customerEmail = localStorage.getItem('customerEmail');
+                if (!customerEmail) {
+                    document.getElementById('purchase-history-container').innerHTML = '<p class="text-sm text-gray-500 text-center">Belum ada riwayat pembelian</p>';
+                    return;
+                }
+
+                const ordersQuery = query(
+                    collection(db, 'orders'),
+                    where('email', '==', customerEmail),
+                    orderBy('timestamp', 'desc'),
+                    limit(3)
+                );
+                const querySnapshot = await getDocs(ordersQuery);
+
+                if (querySnapshot.empty) {
+                    document.getElementById('purchase-history-container').innerHTML = '<p class="text-sm text-gray-500 text-center">Belum ada riwayat pembelian</p>';
+                    return;
+                }
+
+                const historyHtml = querySnapshot.docs.map(doc => {
+                    const order = doc.data();
+                    const orderDate = order.timestamp.toDate().toLocaleDateString('id-ID');
+                    return `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">#${doc.id.slice(-8)}</p>
+                                <p class="text-xs text-gray-500">${orderDate}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-green-600">Rp ${formatPrice(order.total)}</p>
+                                <span class="text-xs px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-100 text-green-800' : order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
+                                    ${order.status === 'paid' ? 'Dibayar' : order.status === 'pending' ? 'Pending' : 'Dalam Proses'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('purchase-history-container').innerHTML = historyHtml;
+            } catch (error) {
+                console.error('Error loading purchase history:', error);
+                document.getElementById('purchase-history-container').innerHTML = '<p class="text-sm text-red-500 text-center">Gagal memuat riwayat</p>';
+            }
+        }
+
+        // Loading Screen
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(function() {
+                    document.getElementById('loading-screen').style.display = 'none';
+                    loadCart();
+                    loadProducts();
+                    loadPurchaseHistory();
+
+                    // Check for payment callback in URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const status = urlParams.get('status');
+                    const orderId = urlParams.get('order_id');
+                    if (status && orderId) {
+                        handlePaymentCallback(status, orderId);
+                        // Clean up URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }, 300);
+            }, 1000);
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Load Cart from LocalStorage
+        function loadCart() {
+            // Check if user is logged in, if not, clear cart
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') || localStorage.getItem('userLoggedIn');
+            if (!isLoggedIn) {
+                cartItems = {};
+                localStorage.removeItem('cart');
+            } else {
+                const cartData = localStorage.getItem('cart');
+                cartItems = JSON.parse(cartData) || {};
+            }
+            renderCart();
+            updateCartUI();
+        }
+
+        // Save Cart to LocalStorage
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cartItems));
+            updateCartUI();
+        }
+
+        // Render Cart Items
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const emptyCart = document.getElementById('empty-cart');
+            const continueShopping = document.getElementById('continue-shopping');
+            const items = Object.values(cartItems);
+
+            if (items.length === 0) {
+                container.innerHTML = '';
+                emptyCart.classList.remove('hidden');
+                continueShopping.classList.add('hidden');
+                updateProgress(0);
+                return;
+            }
+
+            emptyCart.classList.add('hidden');
+            continueShopping.classList.remove('hidden');
+            updateProgress(33);
+
+            container.innerHTML = items.map((item, index) => {
+                // Find product image from Firebase products
+                const productData = allProducts.find(product => product.title === item.product);
+                const productImage = productData ? productData.image : 'https://via.placeholder.com/80x80?text=No+Image';
+
+                return `
+                <div class="cart-item bg-gray-50 rounded-xl p-6 mb-4 border border-gray-200" data-product="${item.product}" data-aos="fade-up" data-aos-delay="${index * 100}">
+                    <div class="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0">
+                        <!-- Product Image -->
+                        <img src="${productImage}" alt="${item.product}" class="w-20 h-20 max-w-full h-auto object-cover rounded-xl flex-shrink-0" onerror="this.src='https://via.placeholder.com/80x80?text=No+Image'">
+
+                        <!-- Product Info -->
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.product}</h3>
+                            <p class="text-green-600 font-bold text-lg">Rp ${formatPrice(item.price)}/kg</p>
+                            <p class="text-sm text-gray-500">Subtotal: Rp ${formatPrice(item.price * item.quantity)}</p>
+                        </div>
+
+                        <!-- Quantity Controls -->
+                        <div class="flex items-center space-x-4">
+                            <div class="quantity-control">
+                                <button class="quantity-btn w-8 h-8 sm:w-9 sm:h-9" onclick="decreaseQuantity('${item.product}')">−</button>
+                                <input type="number" class="quantity-input w-12 sm:w-14" value="${item.quantity}" min="1" max="1000" onchange="updateQuantity('${item.product}', this.value)">
+                                <button class="quantity-btn w-8 h-8 sm:w-9 sm:h-9" onclick="increaseQuantity('${item.product}')">+</button>
+                            </div>
+
+                            <button onclick="removeFromCart('${item.product}')" class="text-red-500 hover:text-red-700 transition-colors duration-300 p-2 hover:bg-red-50 rounded-lg" title="Hapus dari keranjang">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Quantity Management
+        function increaseQuantity(productName) {
+            if (cartItems[productName]) {
+                const maxQuantity = productName.includes('Bulk') ? 1000 : 100;
+                if (cartItems[productName].quantity < maxQuantity) {
+                    cartItems[productName].quantity += 1;
+                    saveCart();
+                    renderCart();
+                    showToast('Jumlah produk ditambah');
+                }
+            }
+        }
+
+        function decreaseQuantity(productName) {
+            if (cartItems[productName] && cartItems[productName].quantity > 1) {
+                cartItems[productName].quantity -= 1;
+                saveCart();
+                renderCart();
+                showToast('Jumlah produk dikurangi');
+            }
+        }
+
+        function updateQuantity(productName, newQuantity) {
+            const quantity = parseInt(newQuantity);
+            if (quantity > 0 && quantity <= 1000) {
+                cartItems[productName].quantity = quantity;
+                saveCart();
+                renderCart();
+                showToast('Jumlah produk diperbarui');
+            }
+        }
+
+        function removeFromCart(productName) {
+            if (confirm('Yakin ingin menghapus produk ini dari keranjang?')) {
+                const cartItem = document.querySelector(`[data-product="${productName}"]`);
+                cartItem.classList.add('removing');
+                
+                setTimeout(() => {
+                    delete cartItems[productName];
+                    saveCart();
+                    renderCart();
+                    showToast('Produk dihapus dari keranjang', 'error');
+                }, 300);
+            }
+        }
+
+        // Update Cart UI
+        function updateCartUI() {
+            const items = Object.values(cartItems);
+            const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+            const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+            // Update cart count in navigation
+            document.getElementById('cart-count').textContent = cartCount;
+
+            // Update cart count in header
+            document.getElementById('header-cart-number').textContent = cartCount;
+
+            // Update cart count in float button
+            document.getElementById('cart-count-float').textContent = cartCount;
+            
+            // Update summary
+            document.getElementById('subtotal').textContent = `Rp ${formatPrice(subtotal)}`;
+            
+            // Apply discount if any
+            let discount = 0;
+            if (appliedPromo) {
+                discount = subtotal * (appliedPromo.percentage / 100);
+                document.getElementById('discount').textContent = `- Rp ${formatPrice(discount)}`;
+            } else {
+                document.getElementById('discount').textContent = '- Rp 0';
+            }
+            
+            const total = subtotal - discount;
+            document.getElementById('total-amount').textContent = `Rp ${formatPrice(total)}`;
+            
+            // Enable/disable checkout button
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (cartCount > 0) {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = '🚀 Lanjut ke Pembayaran';
+                updateProgress(66);
+            } else {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Keranjang Kosong';
+                updateProgress(0);
+            }
+        }
+
+        // Progress Bar
+        function updateProgress(percentage) {
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = percentage + '%';
+        }
+
+        // Promo Code
+        function applyPromo() {
+            const promoCode = document.getElementById('promo-code').value.trim().toUpperCase();
+            const validPromos = {
+                'WELCOME10': { percentage: 10, description: 'Diskon 10% untuk member baru' },
+                'FRESH20': { percentage: 20, description: 'Diskon 20% untuk pembelian pisang segar' },
+                'BULK15': { percentage: 15, description: 'Diskon 15% untuk pembelian bulk' }
+            };
+            
+            if (validPromos[promoCode]) {
+                appliedPromo = validPromos[promoCode];
+                updateCartUI();
+                showToast(`Promo ${promoCode} berhasil diterapkan! ${appliedPromo.description}`);
+                document.getElementById('promo-code').value = '';
+            } else {
+                showToast('Kode promo tidak valid', 'error');
+            }
+        }
+
+        // Add Recommendation
+        function addRecommendation(productName, price) {
+            if (cartItems[productName]) {
+                cartItems[productName].quantity += 1;
+            } else {
+                cartItems[productName] = {
+                    product: productName,
+                    price: price,
+                    quantity: 1
+                };
+            }
+            saveCart();
+            renderCart();
+            showToast(`${productName} ditambahkan ke keranjang!`);
+        }
+
+        // Checkout Process
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+            if (Object.keys(cartItems).length === 0) {
+                showToast('Keranjang masih kosong!', 'error');
+                return;
+            }
+            document.getElementById('checkout-modal').classList.remove('hidden');
+            updateProgress(100);
+        });
+
+        document.getElementById('cancel-checkout').addEventListener('click', function() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+            updateProgress(66);
+        });
+
+        document.getElementById('customer-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('customer-name').value;
+            const email = document.getElementById('customer-email').value;
+            const phone = document.getElementById('customer-phone').value;
+            const address = document.getElementById('customer-address').value;
+            const notes = document.getElementById('customer-notes').value;
+
+            if (!name || !email || !phone || !address) {
+                showToast('Mohon lengkapi semua data yang wajib diisi!', 'error');
+                return;
+            }
+
+            // Prepare order data
+            const items = Object.values(cartItems);
+            const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            const discount = appliedPromo ? subtotal * (appliedPromo.percentage / 100) : 0;
+            const total = subtotal - discount;
+
+            const orderData = {
+                customerName: name,
+                name: name,
+                email: email,
+                phone: phone,
+                address: address,
+                notes: notes,
+                items: items.map(item => ({
+                    product: item.product,
+                    price: item.price,
+                    quantity: item.quantity
+                })),
+                subtotal: subtotal,
+                discount: discount,
+                total: total,
+                promoCode: appliedPromo ? appliedPromo : null,
+                status: 'pending',
+                timestamp: new Date()
+            };
+
+            try {
+                // Save order to Firebase
+                const orderId = await saveOrderToFirebase(orderData);
+                console.log('Order saved successfully:', orderId);
+
+                // Store customer email for order tracking
+                localStorage.setItem('customerEmail', orderData.email);
+
+                // Close checkout modal
+                document.getElementById('checkout-modal').classList.add('hidden');
+
+                // Prepare transaction data for Midtrans
+                const transactionData = {
+                    transaction_details: {
+                        order_id: orderId,
+                        gross_amount: Math.round(total)
+                    },
+                    customer_details: {
+                        first_name: name,
+                        email: email,
+                        phone: phone
+                    },
+                    item_details: items.map(item => ({
+                        id: item.product,
+                        price: Math.round(item.price),
+                        quantity: item.quantity,
+                        name: item.product
+                    }))
+                };
+
+                // Get Snap Token
+                const snapToken = await getSnapToken(transactionData);
+
+                // Call Midtrans Snap
+                snap.pay(snapToken, {
+                    onSuccess: function(result) {
+                        console.log('Payment success:', result);
+                        window.location.href = `cart.html?status=finish&order_id=${orderId}`;
+                    },
+                    onPending: function(result) {
+                        console.log('Payment pending:', result);
+                        window.location.href = `cart.html?status=pending&order_id=${orderId}`;
+                    },
+                    onError: function(result) {
+                        console.log('Payment error:', result);
+                        window.location.href = `cart.html?status=error&order_id=${orderId}`;
+                    },
+                    onClose: function() {
+                        console.log('Payment popup closed');
+                        // Optional: handle close
+                    }
+                });
+
+            } catch (error) {
+                console.error('Failed to process order:', error);
+                showToast('Gagal memproses pesanan. Silakan coba lagi.', 'error');
+            }
+        });
+
+        // Payment Success
+        function showPaymentSuccess(orderId, total, orderData) {
+            // Create confetti effect
+            createConfetti();
+
+            // Send email and WhatsApp notifications
+            sendEmail(orderData, orderId, total);
+            sendWhatsApp(orderData, orderId, total);
+
+            // Show success modal
+            const successModal = document.createElement('div');
+            successModal.className = 'modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            successModal.innerHTML = `
+                <div class="modal-content payment-success bg-white rounded-2xl p-8 w-full max-w-md text-center">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3 class="text-2xl font-bold text-green-600 mb-4">Pesanan Berhasil!</h3>
+                    <p class="text-gray-600 mb-4">Terima kasih telah berbelanja di TelugeAgro</p>
+                    <div class="bg-green-50 p-4 rounded-xl mb-6">
+                        <p class="text-sm text-gray-600">Order ID:</p>
+                        <p class="font-bold text-green-600">#${orderId}</p>
+                        <p class="text-sm text-gray-600 mt-2">Total Pembayaran:</p>
+                        <p class="text-2xl font-bold text-green-600">Rp ${formatPrice(total)}</p>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-6">Kami akan menghubungi Anda melalui WhatsApp untuk konfirmasi dan pengaturan pengiriman. Email konfirmasi juga telah dikirim.</p>
+                    <div class="flex gap-3">
+                        <button onclick="location.href='store.html'" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-300">
+                            Belanja Lagi
+                        </button>
+                        <button onclick="location.href='pesanan.html'" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-300">
+                            📦 Chek Pesanan
+                        
+                        </button>
+                        <button onclick="contactWhatsApp('${orderId}', ${total})" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-300">
+                            📱 WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(successModal);
+
+            // Auto remove after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(successModal)) {
+                    document.body.removeChild(successModal);
+                }
+            }, 10000);
+        }
+
+        // Contact WhatsApp
+        function contactWhatsApp(orderId, total) {
+            const message = `Halo TelugeAgro! Saya telah melakukan pemesanan dengan Order ID #${orderId} dengan total Rp ${formatPrice(total)}. Mohon konfirmasi dan informasi pengiriman. Terima kasih!`;
+            const whatsappUrl = `https://wa.me/628112638318?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Send Email using EmailJS
+        function sendEmail(orderData, orderId, total) {
+            const templateParams = {
+                to_email: orderData.email,
+                customer_name: orderData.name,
+                order_id: orderId,  // Use full Firebase order ID here
+                total_amount: formatPrice(total),
+                items: orderData.items.map(item => `${item.product} (${item.quantity} kg)`).join(', '),
+                phone: orderData.phone,
+                address: orderData.address,
+                notes: orderData.notes || 'Tidak ada catatan'
+            };
+
+            emailjs.send('service_m4i8r55', 'template_16sgakk', templateParams)
+                .then(function(response) {
+                    console.log('Email sent successfully:', response);
+                    showToast('Email konfirmasi telah dikirim!');
+                }, function(error) {
+                    console.error('Email send failed:', error);
+                    showToast('Gagal mengirim email konfirmasi', 'error');
+                });
+        }
+        // Send WhatsApp message using WhatsApp Web URL - prepares message for business
+        function sendWhatsApp(orderData, orderId, total) {
+            const message = `Pesanan baru dari ${orderData.name}. Order ID: #${orderId}. Total: Rp ${formatPrice(total)}. Produk: ${orderData.items.map(item => `${item.product} (${item.quantity}kg)`).join(', ')}. Alamat: ${orderData.address}. Catatan: ${orderData.notes || 'Tidak ada'}.`;
+
+            // Prepare WhatsApp URL with prefilled message (but don't open automatically)
+            const whatsappUrl = `https://wa.me/628112638318?text=${encodeURIComponent(message)}`;
+
+            // Note: WhatsApp will be opened only when user clicks the WhatsApp button in success modal
+            console.log('WhatsApp message prepared:', message);
+        }
+
+        // Confetti Effect
+        function createConfetti() {
+            const colors = ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(confetti)) {
+                            document.body.removeChild(confetti);
+                        }
+                    }, 5000);
+                }, i * 50);
+            }
+        }
+
+        // Handle Payment Callback
+        async function handlePaymentCallback(status, orderId) {
+            try {
+                // Update order status in Firebase
+                const orderRef = doc(db, 'orders', orderId);
+                await updateDoc(orderRef, {
+                    status: status === 'finish' ? 'paid' : status
+                });
+
+                if (status === 'finish') {
+                    // Clear cart
+                    cartItems = {};
+                    saveCart();
+                    renderCart();
+                    // Show success message and redirect
+                    showToast('Pembayaran berhasil!');
+                    setTimeout(() => {
+                        window.location.href = 'pesanan.html';
+                    }, 2000);
+                } else if (status === 'pending') {
+                    showToast('Pembayaran sedang diproses.', 'warning');
+                } else if (status === 'error') {
+                    showToast('Pembayaran gagal.', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+            }
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Make functions global
+        window.saveOrderToFirebase = saveOrderToFirebase;
+        window.applyPromo = applyPromo;
+        window.addRecommendation = addRecommendation;
+        window.increaseQuantity = increaseQuantity;
+        window.decreaseQuantity = decreaseQuantity;
+        window.updateQuantity = updateQuantity;
+        window.removeFromCart = removeFromCart;
+        window.contactWhatsApp = contactWhatsApp;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus first input in checkout modal
+            document.getElementById('checkout-modal').addEventListener('shown', function() {
+                document.getElementById('customer-name').focus();
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC to close modals
+            if (e.key === 'Escape') {
+                document.getElementById('checkout-modal').classList.add('hidden');
+            }
+            
+            // Enter to apply promo code when focused on promo input
+            if (e.key === 'Enter' && document.activeElement === document.getElementById('promo-code')) {
+                applyPromo();
+            }
+        });
+    </script>
+</body>
+</html>
