@@ -20,7 +20,7 @@ app.get('/cart.html', (req, res) => {
     res.sendFile(__dirname + '/public/cart.html');
 });
 
-app.post('/get-snap-token', async (req, res) => {
+app.post('/api/get-snap-token', async (req, res) => {
     console.log('📦 Transaction Data Diterima:', req.body);
     try {
   const response = await fetch('https://app.midtrans.com/snap/v1/transactions', {
