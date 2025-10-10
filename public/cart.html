@@ -775,7 +775,9 @@
             updateDoc,
             doc,
             where,
-            limit
+            limit,
+            setDoc,
+            getDoc
         } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -1000,29 +1002,85 @@ const response = await fetch('/api/get-snap-token', {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Load Cart from LocalStorage (user-specific)
-        function loadCart() {
+        // Load Cart from Firebase (with localStorage fallback)
+        async function loadCart() {
             if (!userUID) {
                 console.log('No user UID, cannot load cart');
                 cartItems = {};
                 return;
             }
-            
-            const cartKey = `cart_${userUID}`;
-            const cartData = localStorage.getItem(cartKey);
-            cartItems = JSON.parse(cartData) || {};
-            console.log('Cart loaded for user:', userUID, cartItems);
+
+            await loadCartFromFirebase();
             renderCart();
             updateCartUI();
         }
 
-        // Save Cart to LocalStorage (user-specific)
+        // Save Cart to Firebase (with localStorage fallback)
+        async function saveCartToFirebase() {
+            if (!userUID) {
+                console.log('No user UID, cannot save cart to Firebase');
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, 'carts', userUID);
+                await setDoc(cartRef, {
+                    items: cartItems,
+                    lastUpdated: new Date()
+                });
+                console.log('Cart saved to Firebase for user:', userUID);
+            } catch (error) {
+                console.error('Error saving cart to Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                localStorage.setItem(cartKey, JSON.stringify(cartItems));
+                console.log('Cart saved to localStorage as fallback');
+            }
+        }
+
+        // Load Cart from Firebase (with localStorage fallback)
+        async function loadCartFromFirebase() {
+            if (!userUID) {
+                console.log('No user UID, cannot load cart from Firebase');
+                cartItems = {};
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, 'carts', userUID);
+                const cartSnap = await getDoc(cartRef);
+
+                if (cartSnap.exists()) {
+                    cartItems = cartSnap.data().items || {};
+                    console.log('Cart loaded from Firebase for user:', userUID, cartItems);
+                } else {
+                    // No Firebase cart, try localStorage
+                    const cartKey = `cart_${userUID}`;
+                    const cartData = localStorage.getItem(cartKey);
+                    cartItems = JSON.parse(cartData) || {};
+                    console.log('Cart loaded from localStorage for user:', userUID, cartItems);
+                }
+            } catch (error) {
+                console.error('Error loading cart from Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                const cartData = localStorage.getItem(cartKey);
+                cartItems = JSON.parse(cartData) || {};
+                console.log('Cart loaded from localStorage as fallback for user:', userUID, cartItems);
+            }
+        }
+
+        // Save Cart to LocalStorage (user-specific) - kept for backward compatibility
         function saveCart() {
             if (!userUID) {
                 console.log('No user UID, cannot save cart');
                 return;
             }
-            
+
+            // Save to Firebase first
+            saveCartToFirebase();
+
+            // Also save to localStorage as backup
             const cartKey = `cart_${userUID}`;
             localStorage.setItem(cartKey, JSON.stringify(cartItems));
             console.log('Cart saved for user:', userUID);

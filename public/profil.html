@@ -401,7 +401,7 @@
         async function loadUserStats() {
             try {
                 // Load cart count
-                const cart = JSON.parse(localStorage.getItem('cart')) || {};
+                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
                 const cartItems = Object.values(cart);
                 const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 document.getElementById('cartItemsCount').textContent = cartCount;
