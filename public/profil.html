@@ -3,247 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pesanan Anda - Teluge Agro</title>
+    <title>Profile - TelugeAgro</title>
     <link rel="icon" href="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-</head>
-<body class="bg-green-50 text-gray-800">
-    <!-- Header -->
-    <header class="bg-green-700 text-white py-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center px-4 relative">
-            <div class="flex items-center space-x-2">
-                <img src="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" alt="Logo Teluge Agro" class="w-8 h-8 rounded-full">
-                <h1 class="text-2xl font-bold text-shadow-green">Teluge Agro</h1>
-            </div>
-            <nav class="hidden md:flex space-x-6">
-                <a href="index.html" class="hover:text-green-300">Beranda</a>
-                <a href="leadingpage.html" class="hover:text-green-300">Tentang</a>
-                <a href="store.html" class="hover:text-green-300">Toko</a>
-                <a href="cart.html" class="hover:text-green-300">Keranjang</a>
-            </nav>
-            <button id="mobile-menu-btn" class="md:hidden focus:outline-none">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-        <!-- Mobile Menu -->
-        <nav id="mobile-menu" class="mobile-menu md:hidden bg-green-600 text-white px-4 py-2">
-            <a href="index.html" class="block py-2 hover:text-green-300">Beranda</a>
-            <a href="leadingpage.html" class="block py-2 hover:text-green-300">Tentang</a>
-            <a href="store.html" class="block py-2 hover:text-green-300">Toko</a>
-            <a href="cart.html" class="block py-2 hover:text-green-300">Keranjang</a>
-        </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl md:text-3xl font-bold text-center text-green-800 mb-8" data-aos="fade-up">Pesanan Anda</h2>
-
-            <!-- Order Search -->
-            <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8" data-aos="fade-up">
-                <h3 class="text-lg md:text-xl font-semibold text-green-700 mb-4">Cari Pesanan Anda</h3>
-                <div class="space-y-4">
-                    <!-- Search Type Selection -->
-                    <div class="flex gap-4">
-                 
-                        <label class="flex items-center">
-                            <input type="radio" name="searchType" value="email" class="mr-2">
-                            <span class="text-sm">Cari dengan Email</span>
-                        </label>
-                    </div>
-
-                    <!-- Order ID Input -->
-                    <div id="orderIdSection" class="flex flex-col sm:flex-row gap-4">
-                        <input type="text" id="orderIdInput" placeholder="Masukkan ID pesanan Anda"
-                               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base">
-                        <button id="trackOrderBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap">
-                            Lacak Pesanan
-                        </button>
-                    </div>
-
-                    <!-- Email Input -->
-                    <div id="emailSection" class="hidden flex flex-col sm:flex-row gap-4">
-                        <input type="email" id="emailInput" placeholder="Masukkan email yang tertaut pada pesanan Anda"
-                               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base">
-                        <button id="searchByEmailBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap">
-                            Cari Pesanan
-                        </button>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600 mt-2">ID pesanan dapat ditemukan di email konfirmasi pesanan Anda</p>
-            </div>
-
-                <!-- Order Status Display -->
-                <div id="orderStatus" class="hidden bg-white rounded-lg shadow-lg p-4 md:p-6 max-w-sm mx-auto" data-aos="fade-up">
-                    <div class="mb-4 md:mb-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-lg md:text-xl font-semibold text-green-700">Status Pesanan</h3>
-                            <button id="backToSearchBtn" class="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition text-sm flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                                Kembali
-                            </button>
-                        </div>
-                        <p class="text-gray-600 text-sm md:text-base break-words">ID Pesanan: <span id="displayOrderId" class="font-semibold"></span></p>
-                    </div>
-
-                <!-- Enhanced Progress Bar -->
-                <div class="mb-6">
-                    <div class="flex flex-wrap justify-between items-center mb-3 overflow-x-auto no-scrollbar gap-2">
-                        <div class="flex items-center min-w-0 flex-shrink-0">
-                            <div id="step1" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
-                                <span id="step1-icon" class="hidden">✓</span>
-                                <span id="step1-number">1</span>
-                            </div>
-                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Proses</span>
-                        </div>
-                        <div class="flex items-center min-w-0 flex-shrink-0">
-                            <div id="step2" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
-                                <span id="step2-icon" class="hidden">✓</span>
-                                <span id="step2-number">2</span>
-                            </div>
-                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Sedang Dikemas</span>
-                        </div>
-                        <div class="flex items-center min-w-0 flex-shrink-0">
-                            <div id="step3" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
-                                <span id="step3-icon" class="hidden">✓</span>
-                                <span id="step3-number">3</span>
-                            </div>
-                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Pengiriman</span>
-                        </div>
-                        <div class="flex items-center min-w-0 flex-shrink-0">
-                            <div id="step4" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm step-circle transition-all duration-300">
-                                <span id="step4-icon" class="hidden">✓</span>
-                                <span id="step4-number">4</span>
-                            </div>
-                            <span class="ml-2 text-xs md:text-sm font-medium whitespace-nowrap">Sampai Tujuan</span>
-                        </div>
-                    </div>
-                    <div class="relative h-2 rounded-full bg-gray-200 overflow-hidden">
-                        <div id="progressBar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
-                    </div>
-                    <!-- Current Status Text -->
-                    <div class="mt-3 text-center">
-                        <p id="currentStatusText" class="text-sm font-medium text-gray-600">Memproses pesanan Anda...</p>
-                        <p id="estimatedTime" class="text-xs text-gray-500 mt-1">Estimasi: 1-3 hari kerja</p>
-                    </div>
-                </div>
-
-                <!-- Status Details -->
-                <div class="space-y-6">
-                    <div>
-                        <h4 class="font-semibold text-green-700 mb-2 text-base">Detail Pesanan</h4>
-                        <div id="orderDetails" class="space-y-1 text-sm md:text-base break-words">
-                            <!-- Order details will be populated here -->
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-green-700 mb-2 text-base">Status Pembayaran</h4>
-                        <div id="paymentStatus" class="p-3 rounded-lg border-2 text-sm md:text-base break-words">
-                            <!-- Payment status will be shown here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Reminder -->
-                <div id="paymentReminder" class="mt-4 p-3 bg-orange-100 border-l-4 border-orange-500 rounded-lg hidden text-sm md:text-base break-words">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                        <div>
-                            <h4 class="font-semibold text-orange-800">Pembayaran Belum Diterima</h4>
-                            <p class="text-orange-700">Silakan segera lakukan pembayaran agar pesanan dapat diproses.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Success -->
-                <div id="paymentSuccess" class="mt-4 p-3 bg-green-100 border-l-4 border-green-500 rounded-lg hidden text-sm md:text-base break-words">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <div>
-                            <h4 class="font-semibold text-green-800">Pembayaran Diterima</h4>
-                            <p class="text-green-700">Terima kasih! Pembayaran Anda telah diterima dan pesanan sedang diproses.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Error Message -->
-            <div id="errorMessage" class="hidden bg-red-100 border-l-4 border-red-500 p-4 rounded-lg" data-aos="fade-up">
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div>
-                        <h4 class="font-semibold text-red-800">Pesanan Tidak Ditemukan</h4>
-                        <p class="text-red-700 text-sm">ID pesanan yang Anda masukkan tidak valid atau tidak ditemukan. Silakan periksa kembali ID pesanan Anda.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-6 mt-12">
-        <div class="container mx-auto px-4 text-center">
-            <p>&copy; 2017 Teluge Agro. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <style>
-        .step-circle {
-            background-color: #d1d5db;
-            color: #6b7280;
-            transition: all 0.3s ease;
-        }
-        .step-circle.active {
-            background-color: #16a34a;
-            color: white;
-        }
-        .step-circle.completed {
-            background-color: #16a34a;
-            color: white;
-        }
-        .text-shadow-green {
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Mobile Menu Animation */
-        .mobile-menu {
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .mobile-menu.active {
-            transform: translateX(0);
-        }
-    </style>
-
+    
+    <!-- Firebase SDK -->
     <script type="module">
-        // Firebase SDK imports
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import {
-            getFirestore,
-            doc,
-            getDoc,
-            query,
-            where,
-            getDocs,
-            orderBy,
-            collection,
-            onSnapshot
-        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
@@ -256,518 +26,322 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        window.firebaseAuth = getAuth(app);
+        window.firebaseDb = getFirestore(app);
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.collection = collection;
+        window.query = query;
+        window.where = where;
+        window.orderBy = orderBy;
+        window.getDocs = getDocs;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signOut = signOut;
+    </script>
 
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            min-height: 100vh;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2);
+        }
+
+        .order-item {
+            transition: all 0.3s ease;
+        }
+
+        .order-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #f3e8ff;
+            color: #7c2d12;
+        }
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .cart-item {
+            background: #f8fafc;
+            border-left: 4px solid #22c55e;
+        }
+
+        /* Mobile Menu Animation */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Check -->
+    <script>
+        // Check authentication first
+        if (!localStorage.getItem('adminLoggedIn') && !localStorage.getItem('userLoggedIn')) {
+            window.location.href = 'login.html?redirect=profile.html';
+        }
+    </script>
+
+    <br>
+        <br>
+            <br>
+                <br>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-40 transition-all duration-300" id="navbar" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 hover-scale">
+                    <img src="logo Teluge.jpg" alt="TelugeAgro Logo" class="w-10 h-10 md:w-12 md:h-12 rounded-full pulse-glow">
+                    <span class="text-xl md:text-2xl font-bold text-white">TelugeAgro</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link text-white hover:text-green-200 transition-colors duration-300 font-medium">Beranda</a>
+                    <a href="#about" class="nav-link text-white hover:text-green-200 transition-colors duration-300 font-medium">Tentang</a>
+                    <a href="#products" class="nav-link text-white hover:text-green-200 transition-colors duration-300 font-medium">Produk</a>
+                    <a href="#contact" class="nav-link text-white hover:text-green-200 transition-colors duration-300 font-medium">Kontak</a>
+                    <a href="store.html" class="bg-white text-green-600 px-6 py-2 rounded-full font-semibold hover:bg-green-50 transition-all duration-300 btn-shine">
+                        Beli Sekarang
+                           </a>
+                            <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 font-medium">
+                        Logout
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" aria-controls="mobile-menu" aria-expanded="false" class="md:hidden text-white hover:text-green-200 transition-colors duration-300 cursor-pointer z-50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0 bg-green-700 border-t border-green-600 z-40">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="#home" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Beranda</a>
+                <a href="#about" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Tentang</a>
+                <a href="#products" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Produk</a>
+                <a href="#contact" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Kontak</a>
+                <a href="store.html" class="block px-3 py-2 bg-white text-green-600 rounded font-semibold hover:bg-green-50 transition-colors duration-300 text-center">
+                    Beli Sekarang
+                </a>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Profile Header -->
+            <div class="profile-card rounded-3xl p-8 mb-8" data-aos="fade-down">
+                <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+                    <div class="relative">
+                        <img id="userAvatar" src="" alt="User Avatar" class="w-32 h-32 rounded-full border-4 border-white shadow-xl object-cover">
+                        <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-2">
+                            <span id="userStatusIcon" class="text-2xl">✅</span>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-left flex-1">
+                        <h1 id="userName" class="text-3xl md:text-4xl font-bold mb-2">Loading...</h1>
+                        <p id="userEmail" class="text-xl opacity-90 mb-4">Loading...</p>
+                        <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                            <span id="userRole" class="px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold">Loading...</span>
+                            <span id="memberSince" class="px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8" data-aos="fade-up">
+                <div class="stat-card glass-container rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">🛒</div>
+                    <div class="text-2xl font-bold text-green-600" id="cartItemsCount">0</div>
+                    <div class="text-sm text-gray-600">Item di Keranjang</div>
+                </div>
+                <div class="stat-card glass-container rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">📦</div>
+                    <div class="text-2xl font-bold text-blue-600" id="totalOrders">0</div>
+                    <div class="text-sm text-gray-600">Total Pesanan</div>
+                </div>
+                <div class="stat-card glass-container rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">💰</div>
+                    <div class="text-2xl font-bold text-yellow-600" id="totalSpent">Rp 0</div>
+                    <div class="text-sm text-gray-600">Total Belanja</div>
+                </div>
+                <div class="stat-card glass-container rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">⭐</div>
+                    <div class="text-2xl font-bold text-purple-600" id="loyaltyPoints">0</div>
+                    <div class="text-sm text-gray-600">Poin Loyalitas</div>
+                </div>
+            </div>
+
+            <!-- Content Tabs -->
+            <div class="glass-container rounded-2xl overflow-hidden mb-8" data-aos="fade-up" data-aos-delay="200">
+                <!-- Tab Navigation -->
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-0">
+                        <button onclick="showTab('cart')" class="tab-btn active flex-1 py-4 px-6 text-center font-semibold transition-all bg-green-50 text-green-600 border-b-2 border-green-600" id="cart-tab">
+                            🛒 Keranjang Saya
+                        </button>
+                        <button onclick="showTab('orders')" class="tab-btn flex-1 py-4 px-6 text-center font-semibold transition-all text-gray-500 hover:text-gray-700" id="orders-tab">
+                            📦 Riwayat Pesanan
+                        </button>
+                        <button onclick="showTab('history')" class="tab-btn flex-1 py-4 px-6 text-center font-semibold transition-all text-gray-500 hover:text-gray-700" id="history-tab">
+                            📈 Aktivitas Belanja
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-6">
+                    <!-- Cart Tab -->
+                    <div id="cart-content" class="tab-content">
+                        <h2 class="text-2xl font-bold mb-6">Item di Keranjang Anda</h2>
+                        <div id="cart-items-container">
+                            <!-- Cart items will be loaded here -->
+                        </div>
+                        <div id="cart-empty" class="text-center py-12 hidden">
+                            <div class="text-6xl mb-4">🛒</div>
+                            <h3 class="text-xl font-bold text-gray-700 mb-2">Keranjang Masih Kosong</h3>
+                            <p class="text-gray-500 mb-6">Mulai belanja untuk melihat item di sini</p>
+                            <a href="store.html" class="inline-block bg-green-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all">
+                                Mulai Belanja
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div id="orders-content" class="tab-content hidden">
+                        <h2 class="text-2xl font-bold mb-6">Riwayat Pesanan</h2>
+                        <div id="orders-container">
+                            <!-- Orders will be loaded here -->
+                        </div>
+                        <div id="orders-empty" class="text-center py-12 hidden">
+                            <div class="text-6xl mb-4">📦</div>
+                            <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Pesanan</h3>
+                            <p class="text-gray-500 mb-6">Riwayat pesanan Anda akan muncul di sini</p>
+                            <a href="store.html" class="inline-block bg-green-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition-all">
+                                Belanja Sekarang
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- History Tab -->
+                    <div id="history-content" class="tab-content hidden">
+                        <h2 class="text-2xl font-bold mb-6">Aktivitas Belanja</h2>
+                        <div id="history-container">
+                            <!-- History will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-aos="fade-up" data-aos-delay="400">
+                <a href="store.html" class="glass-container rounded-xl p-6 text-center hover:shadow-lg transition-all">
+                    <div class="text-3xl mb-2">🛍️</div>
+                    <div class="font-semibold text-gray-700">Belanja Lagi</div>
+                </a>
+                <a href="cart.html" class="glass-container rounded-xl p-6 text-center hover:shadow-lg transition-all">
+                    <div class="text-3xl mb-2">🛒</div>
+                    <div class="font-semibold text-gray-700">Lihat Keranjang</div>
+                </a>
+                <button onclick="clearCart()" class="glass-container rounded-xl p-6 text-center hover:shadow-lg transition-all">
+                    <div class="text-3xl mb-2">🗑️</div>
+                    <div class="font-semibold text-gray-700">Kosongkan Keranjang</div>
+                </button>
+                <a href="https://wa.me/628112638318" target="_blank" class="glass-container rounded-xl p-6 text-center hover:shadow-lg transition-all">
+                    <div class="text-3xl mb-2">📞</div>
+                    <div class="font-semibold text-gray-700">Bantuan</div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-all duration-300 z-50">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
         // Initialize AOS
         AOS.init({
             duration: 800,
-            once: true
-        });
-
-        // Order status mapping
-        const statusMap = {
-            'process': { step: 1, label: 'Proses', color: 'bg-blue-500' },
-            'packing': { step: 2, label: 'Sedang Dikemas', color: 'bg-yellow-500' },
-            'shipping': { step: 3, label: 'Pengiriman', color: 'bg-orange-500' },
-            'delivered': { step: 4, label: 'Sampai Tujuan', color: 'bg-green-500' },
-            'completed': { step: 5, label: 'Selesai', color: 'bg-green-600' }
-        };
-
-        // Global variable to track navigation state
-        let currentView = 'search'; // 'search', 'multiple', 'single'
-        let multipleOrdersData = []; // Store multiple orders data
-        let currentOrderId = null; // Track current order ID for real-time updates
-        let unsubscribeListener = null; // Store unsubscribe function for real-time listener
-
-        // Track order function (make it global for onclick access)
-        window.trackOrder = async function(orderId) {
-            try {
-                const orderDoc = await getDoc(doc(db, 'orders', orderId));
-
-                if (orderDoc.exists()) {
-                    const order = orderDoc.data();
-                    currentView = 'single';
-                    displayOrderStatus(order, orderId);
-                    hideErrorMessage();
-                } else {
-                    showErrorMessage();
-                    hideOrderStatus();
-                }
-            } catch (error) {
-                console.error('Error tracking order:', error);
-                showErrorMessage();
-                hideOrderStatus();
-            }
-        };
-
-        // Track single order by ID (for direct search)
-        async function trackSingleOrder(orderId) {
-            try {
-                const orderDoc = await getDoc(doc(db, 'orders', orderId));
-
-                if (orderDoc.exists()) {
-                    const order = orderDoc.data();
-                    currentView = 'single';
-                    currentOrderId = orderId;
-                    displayOrderStatus(order, orderId);
-                    setupRealTimeListener(orderId);
-                    hideErrorMessage();
-                } else {
-                    showErrorMessage();
-                    hideOrderStatus();
-                }
-            } catch (error) {
-                console.error('Error tracking order:', error);
-                showErrorMessage();
-                hideOrderStatus();
-            }
-        }
-
-        // Setup real-time listener for order updates
-        function setupRealTimeListener(orderId) {
-            // Clean up existing listener if any
-            if (unsubscribeListener) {
-                unsubscribeListener();
-                unsubscribeListener = null;
-            }
-
-            try {
-                const orderRef = doc(db, 'orders', orderId);
-
-                // Set up real-time listener
-                unsubscribeListener = onSnapshot(orderRef, (doc) => {
-                    if (doc.exists()) {
-                        const updatedOrder = doc.data();
-                        console.log('Order updated in real-time:', updatedOrder);
-
-                        // Update the display with new data
-                        displayOrderStatus(updatedOrder, orderId);
-
-                        // Show notification about the update
-                        showUpdateNotification(updatedOrder);
-                    } else {
-                        console.log('Order document no longer exists');
-                        showErrorMessage();
-                        hideOrderStatus();
-                    }
-                }, (error) => {
-                    console.error('Error in real-time listener:', error);
-                });
-
-                console.log('Real-time listener set up for order:', orderId);
-            } catch (error) {
-                console.error('Error setting up real-time listener:', error);
-            }
-        }
-
-        // Show notification when order is updated
-        function showUpdateNotification(order) {
-            // Remove any existing notification
-            const existingNotification = document.getElementById('updateNotification');
-            if (existingNotification) {
-                existingNotification.remove();
-            }
-
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.id = 'updateNotification';
-            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full';
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div>
-                        <p class="font-semibold">Status Pesanan Diperbarui!</p>
-                        <p class="text-sm opacity-90">Status pesanan Anda telah berubah</p>
-                    </div>
-                </div>
-            `;
-
-            // Add to page
-            document.body.appendChild(notification);
-
-            // Animate in
-            setTimeout(() => {
-                notification.classList.remove('translate-x-full');
-            }, 100);
-
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                notification.classList.add('translate-x-full');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
-                }, 300);
-            }, 5000);
-        }
-
-        // Clean up real-time listener
-        function cleanupRealTimeListener() {
-            if (unsubscribeListener) {
-                console.log('Cleaning up real-time listener');
-                unsubscribeListener();
-                unsubscribeListener = null;
-            }
-        }
-
-        // Search orders by email
-        async function searchOrdersByEmail(email) {
-            try {
-                // First, get all orders for the email without orderBy to avoid index requirement
-                const ordersQuery = query(collection(db, 'orders'), where('email', '==', email));
-                const querySnapshot = await getDocs(ordersQuery);
-
-                if (!querySnapshot.empty) {
-                    const orders = [];
-                    querySnapshot.forEach((doc) => {
-                        orders.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-
-                    // Sort orders by timestamp in descending order (newest first)
-                    orders.sort((a, b) => {
-                        if (!a.timestamp || !b.timestamp) return 0;
-                        return b.timestamp.toDate() - a.timestamp.toDate();
-                    });
-
-                    // Store orders data for back navigation
-                    multipleOrdersData = orders;
-                    currentView = 'multiple';
-
-                    displayMultipleOrders(orders);
-                    hideErrorMessage();
-                } else {
-                    showErrorMessage();
-                    hideOrderStatus();
-                }
-            } catch (error) {
-                console.error('Error searching orders by email:', error);
-                showErrorMessage();
-                hideOrderStatus();
-            }
-        }
-
-        // Display multiple orders
-        function displayMultipleOrders(orders) {
-            const orderStatusDiv = document.getElementById('orderStatus');
-            const displayOrderId = document.getElementById('displayOrderId');
-            const orderDetails = document.getElementById('orderDetails');
-            const paymentStatus = document.getElementById('paymentStatus');
-
-            // Set title for multiple orders
-            displayOrderId.textContent = `${orders.length} Pesanan Ditemukan`;
-
-            // Display order list
-            orderDetails.innerHTML = orders.map(order => `
-                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-semibold text-green-700">ID: ${order.id}</h4>
-                        <button onclick="trackOrder('${order.id}')" class="text-green-600 hover:text-green-700 text-sm font-medium">
-                            Lihat Detail →
-                        </button>
-                    </div>
-                    <p><strong>Nama:</strong> ${order.customerName || order.name}</p>
-                    <p><strong>Total:</strong> Rp. ${order.total.toFixed(0)}</p>
-                    <p><strong>Tanggal:</strong> ${order.timestamp.toDate().toLocaleString('id-ID')}</p>
-                    <p><strong>Status:</strong> ${getStatusLabel(order.status || 'process')}</p>
-                </div>
-            `).join('');
-
-            // Display payment status summary
-            const paidOrders = orders.filter(order => order.paymentStatus === 'paid').length;
-            paymentStatus.className = 'p-4 rounded-lg border-2 border-blue-500 bg-blue-50';
-            paymentStatus.innerHTML = `
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full bg-blue-500 mr-3"></div>
-                    <div>
-                        <p class="font-semibold text-blue-800">
-                            ${paidOrders}/${orders.length} Pesanan Sudah Dibayar
-                        </p>
-                        <p class="text-sm text-blue-600">
-                            Klik "Lihat Detail" untuk informasi lengkap
-                        </p>
-                    </div>
-                </div>
-            `;
-
-            // Hide progress bar for multiple orders view
-            document.getElementById('progressBar').style.width = '0%';
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById(`step${i}`).className = 'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm step-circle';
-            }
-
-            // Hide payment notifications
-            document.getElementById('paymentReminder').classList.add('hidden');
-            document.getElementById('paymentSuccess').classList.add('hidden');
-
-            // Show order status
-            orderStatusDiv.classList.remove('hidden');
-            orderStatusDiv.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Helper function to get status label
-        function getStatusLabel(status) {
-            const labels = {
-                'process': 'Proses',
-                'packing': 'Sedang Dikemas',
-                'shipping': 'Pengiriman',
-                'delivered': 'Sampai Tujuan'
-            };
-            return labels[status] || 'Proses';
-        }
-
-        function displayOrderStatus(order, orderId) {
-            const orderStatusDiv = document.getElementById('orderStatus');
-            const displayOrderId = document.getElementById('displayOrderId');
-            const orderDetails = document.getElementById('orderDetails');
-            const paymentStatus = document.getElementById('paymentStatus');
-
-            // Set order ID
-            displayOrderId.textContent = orderId;
-
-            // Helper function to format address
-            function formatAddress(order) {
-                const addressFields = [
-                    order.shippingAddress,
-                    order.deliveryAddress,
-                    order.address,
-                    order.customerAddress
-                ];
-
-                for (const addr of addressFields) {
-                    if (addr) {
-                        if (typeof addr === 'string') {
-                            return addr;
-                        } else if (typeof addr === 'object') {
-                            const parts = [];
-                            if (addr.street) parts.push(addr.street);
-                            if (addr.city) parts.push(addr.city);
-                            if (addr.province) parts.push(addr.province);
-                            if (addr.postalCode) parts.push(addr.postalCode);
-                            if (addr.country) parts.push(addr.country);
-                            return parts.join(', ');
-                        }
-                    }
-                }
-                return 'N/A';
-            }
-
-            // Display order details
-            orderDetails.innerHTML = `
-                <p><strong>Nama:</strong> ${order.customerName || order.name}</p>
-                <p><strong>Email:</strong> ${order.email}</p>
-                <p><strong>Telepon:</strong> ${order.phone || 'N/A'}</p>
-                <p><strong>Alamat:</strong> ${formatAddress(order)}</p>
-                <p><strong>Total:</strong> Rp. ${order.total.toFixed(0)}</p>
-                <p><strong>Tanggal:</strong> ${order.timestamp.toDate().toLocaleString('id-ID')}</p>
-            `;
-
-            // Display payment status
-            const paymentPaid = order.paymentStatus === 'paid';
-            paymentStatus.className = `p-4 rounded-lg border-2 ${paymentPaid ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`;
-            paymentStatus.innerHTML = `
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full ${paymentPaid ? 'bg-green-500' : 'bg-orange-500'} mr-3"></div>
-                    <div>
-                        <p class="font-semibold ${paymentPaid ? 'text-green-800' : 'text-orange-800'}">
-                            ${paymentPaid ? 'Sudah Dibayar' : 'Belum Dibayar'}
-                        </p>
-                        <p class="text-sm ${paymentPaid ? 'text-green-600' : 'text-orange-600'}">
-                            ${paymentPaid ? 'Pembayaran telah diterima' : 'Menunggu pembayaran'}
-                        </p>
-                    </div>
-                </div>
-            `;
-
-            // Update progress bar and steps with enhanced functionality
-            updateProgress(order.status || 'process', paymentPaid);
-
-            // Show/hide payment notifications
-            const paymentReminder = document.getElementById('paymentReminder');
-            const paymentSuccess = document.getElementById('paymentSuccess');
-
-            if (!paymentPaid) {
-                paymentReminder.classList.remove('hidden');
-                paymentSuccess.classList.add('hidden');
-            } else {
-                paymentReminder.classList.add('hidden');
-                paymentSuccess.classList.remove('hidden');
-            }
-
-            // Show order status
-            orderStatusDiv.classList.remove('hidden');
-            orderStatusDiv.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function updateProgress(status, paymentPaid) {
-            console.log('updateProgress called with status:', status, 'paymentPaid:', paymentPaid);
-            console.log('Available statusMap:', statusMap);
-
-            const statusInfo = statusMap[status] || statusMap['process'];
-            console.log('statusInfo:', statusInfo);
-
-            const progressPercentage = (statusInfo.step / 4) * 100;
-            console.log('progressPercentage:', progressPercentage);
-
-            // Update progress bar
-            const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = `${progressPercentage}%`;
-
-            // Update step circles with checkmarks
-            for (let i = 1; i <= 4; i++) {
-                const stepElement = document.getElementById(`step${i}`);
-                const stepIcon = document.getElementById(`step${i}-icon`);
-                const stepNumber = document.getElementById(`step${i}-number`);
-
-                console.log(`Processing step ${i}, statusInfo.step: ${statusInfo.step}`);
-
-                stepElement.className = 'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm step-circle transition-all duration-300';
-
-                if (i < statusInfo.step) {
-                    // Completed steps - show checkmark
-                    console.log(`Step ${i} is completed`);
-                    stepElement.classList.add('completed');
-                    stepIcon.classList.remove('hidden');
-                    stepNumber.classList.add('hidden');
-                } else if (i === statusInfo.step) {
-                    // Current step - show number
-                    console.log(`Step ${i} is active`);
-                    stepElement.classList.add('active');
-                    stepIcon.classList.add('hidden');
-                    stepNumber.classList.remove('hidden');
-                } else {
-                    // Future steps - show number
-                    console.log(`Step ${i} is future`);
-                    stepElement.classList.remove('active', 'completed');
-                    stepIcon.classList.add('hidden');
-                    stepNumber.classList.remove('hidden');
-                }
-            }
-
-            // Update status text and estimated time
-            const statusText = document.getElementById('currentStatusText');
-            const estimatedTime = document.getElementById('estimatedTime');
-
-            if (!paymentPaid) {
-                statusText.textContent = 'Menunggu pembayaran untuk memproses pesanan';
-                estimatedTime.textContent = 'Estimasi: Setelah pembayaran diterima';
-            } else {
-                switch(status) {
-                    case 'process':
-                        statusText.textContent = 'Pesanan Anda sedang diproses';
-                        estimatedTime.textContent = 'Estimasi: 1-2 hari kerja';
-                        break;
-                    case 'packing':
-                        statusText.textContent = 'Pesanan Anda sedang dikemas';
-                        estimatedTime.textContent = 'Estimasi: 2-3 hari kerja';
-                        break;
-                    case 'shipping':
-                        statusText.textContent = 'Pesanan Anda dalam perjalanan';
-                        estimatedTime.textContent = 'Estimasi: 3-5 hari kerja';
-                        break;
-                    case 'delivered':
-                        statusText.textContent = 'Pesanan Anda telah sampai!';
-                        estimatedTime.textContent = 'Terima kasih telah berbelanja';
-                        break;
-                    default:
-                        statusText.textContent = 'Memproses pesanan Anda...';
-                        estimatedTime.textContent = 'Estimasi: 1-3 hari kerja';
-                }
-            }
-
-            // Note: Progress bar shows actual order status, payment status only affects the text message
-        }
-
-        function showErrorMessage() {
-            document.getElementById('errorMessage').classList.remove('hidden');
-        }
-
-        function hideErrorMessage() {
-            document.getElementById('errorMessage').classList.add('hidden');
-        }
-
-        function hideOrderStatus() {
-            document.getElementById('orderStatus').classList.add('hidden');
-        }
-
-        // Radio button toggle functionality
-        document.querySelectorAll('input[name="searchType"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const orderIdSection = document.getElementById('orderIdSection');
-                const emailSection = document.getElementById('emailSection');
-
-                if (e.target.value === 'email') {
-                    orderIdSection.classList.add('hidden');
-                    emailSection.classList.remove('hidden');
-                } else {
-                    emailSection.classList.add('hidden');
-                    orderIdSection.classList.remove('hidden');
-                }
-            });
-        });
-
-        // Event listeners
-        document.getElementById('trackOrderBtn').addEventListener('click', () => {
-            const orderId = document.getElementById('orderIdInput').value.trim();
-            if (orderId) {
-                trackSingleOrder(orderId);
-            }
-        });
-
-        document.getElementById('searchByEmailBtn').addEventListener('click', () => {
-            const email = document.getElementById('emailInput').value.trim();
-            if (email) {
-                searchOrdersByEmail(email);
-            }
-        });
-
-        document.getElementById('orderIdInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const orderId = e.target.value.trim();
-                if (orderId) {
-                    trackSingleOrder(orderId);
-                }
-            }
-        });
-
-        document.getElementById('emailInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const email = e.target.value.trim();
-                if (email) {
-                    searchOrdersByEmail(email);
-                }
-            }
-        });
-
-        // Back button functionality with proper navigation
-        document.getElementById('backToSearchBtn').addEventListener('click', () => {
-            // Clean up real-time listener when leaving single order view
-            if (currentView === 'single') {
-                cleanupRealTimeListener();
-                currentOrderId = null;
-            }
-
-            hideOrderStatus();
-            hideErrorMessage();
-
-            // Navigate based on current view state
-            if (currentView === 'single' && multipleOrdersData.length > 0) {
-                // If coming from single order view and we have multiple orders data, go back to multiple orders
-                currentView = 'multiple';
-                displayMultipleOrders(multipleOrdersData);
-            } else {
-                // If coming from search or no multiple orders data, go back to search form
-                currentView = 'search';
-                // Clear input fields
-                document.getElementById('orderIdInput').value = '';
-                document.getElementById('emailInput').value = '';
-                // Scroll back to search form
-                document.querySelector('.bg-white.rounded-lg.shadow-lg').scrollIntoView({ behavior: 'smooth' });
-            }
+            once: true,
+            offset: 100
         });
 
         // Mobile menu toggle
@@ -777,6 +351,601 @@
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('active');
         });
+
+        // Global variables
+        let currentUser = null;
+        let userUID = null;
+
+        // Initialize when page loads
+        window.addEventListener('load', async () => {
+            try {
+                userUID = localStorage.getItem('userUID') || 'guest';
+                await loadUserProfile();
+                await loadUserStats();
+                await loadCartItems();
+                
+                // Set up auth state listener for Firebase users
+                if (window.firebaseAuth) {
+                    onAuthStateChanged(firebaseAuth, (user) => {
+                        if (user) {
+                            currentUser = user;
+                            userUID = user.uid;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast('Gagal memuat profil', 'error');
+            }
+        });
+
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                const userName = localStorage.getItem('userName') || 'User';
+                const userEmail = localStorage.getItem('userEmail') || '';
+                const userPhoto = localStorage.getItem('userPhoto') || 'https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg';
+                const isAdmin = localStorage.getItem('adminLoggedIn') === 'true';
+
+                // Update profile info
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userEmail').textContent = userEmail;
+                document.getElementById('userAvatar').src = userPhoto;
+                document.getElementById('userRole').textContent = isAdmin ? '👑 Admin' : '🛍️ Customer';
+
+                // Set member since date
+                const memberSince = localStorage.getItem('memberSince') || new Date().toLocaleDateString('id-ID');
+                document.getElementById('memberSince').textContent = `📅 Member sejak ${memberSince}`;
+
+                // Try to load from Firebase if available
+                if (currentUser && window.firebaseDb) {
+                    const userRef = doc(firebaseDb, 'users', currentUser.uid);
+                    const userDoc = await getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.createdAt) {
+                            const createdDate = userData.createdAt.toDate().toLocaleDateString('id-ID');
+                            document.getElementById('memberSince').textContent = `📅 Member sejak ${createdDate}`;
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+
+        // Load user statistics
+        async function loadUserStats() {
+            try {
+                // Load cart count
+                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
+                const cartItems = Object.values(cart);
+                const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                document.getElementById('cartItemsCount').textContent = cartCount;
+
+                // Load order statistics from Firebase
+                if (window.firebaseDb) {
+                    const userEmail = localStorage.getItem('userEmail');
+                    if (!userEmail) return;
+
+                    const ordersQuery = query(
+                        collection(firebaseDb, 'orders'),
+                        where('email', '==', userEmail)
+                    );
+
+                    const ordersSnapshot = await getDocs(ordersQuery);
+                    const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    document.getElementById('totalOrders').textContent = orders.length;
+
+                    // Calculate total spent
+                    const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+                    document.getElementById('totalSpent').textContent = `Rp ${formatPrice(totalSpent)}`;
+
+                    // Calculate loyalty points (10% of total spent)
+                    const loyaltyPoints = Math.floor(totalSpent / 1000);
+                    document.getElementById('loyaltyPoints').textContent = loyaltyPoints;
+                }
+
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        // Load cart items
+        async function loadCartItems() {
+            try {
+                const cartContainer = document.getElementById('cart-items-container');
+                const cartEmpty = document.getElementById('cart-empty');
+                
+                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
+                const cartItems = Object.values(cart);
+
+                if (cartItems.length === 0) {
+                    cartContainer.innerHTML = '';
+                    cartEmpty.classList.remove('hidden');
+                    return;
+                }
+
+                cartEmpty.classList.add('hidden');
+                
+                cartContainer.innerHTML = cartItems.map(item => `
+                    <div class="cart-item rounded-xl p-4 mb-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <img src="https://via.placeholder.com/60x60?text=🍌" alt="${item.product}" class="w-15 h-15 rounded-lg object-cover">
+                            <div>
+                                <h3 class="font-semibold text-gray-800">${item.product}</h3>
+                                <p class="text-sm text-gray-600">Rp ${formatPrice(item.price)}/kg</p>
+                                <p class="text-sm font-medium text-green-600">${item.quantity} kg</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-gray-800">Rp ${formatPrice(item.price * item.quantity)}</p>
+                            <button onclick="removeFromCart('${item.product}')" class="text-sm text-red-500 hover:text-red-700 transition-colors">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading cart items:', error);
+            }
+        }
+
+        // Load order history with real-time updates
+        async function loadOrderHistory() {
+            try {
+                const ordersContainer = document.getElementById('orders-container');
+                const ordersEmpty = document.getElementById('orders-empty');
+
+                if (!window.firebaseDb) {
+                    ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Riwayat pesanan tidak tersedia</p>';
+                    return;
+                }
+
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail) {
+                    ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Silakan login terlebih dahulu</p>';
+                    return;
+                }
+
+                // Show loading
+                ordersContainer.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div></div>';
+
+                const ordersQuery = query(
+                    collection(firebaseDb, 'orders'),
+                    where('email', '==', userEmail)
+                );
+
+                const ordersSnapshot = await getDocs(ordersQuery);
+                const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Sort by timestamp desc
+                orders.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
+
+                if (orders.length === 0) {
+                    ordersContainer.innerHTML = '';
+                    ordersEmpty.classList.remove('hidden');
+                    return;
+                }
+
+                ordersEmpty.classList.add('hidden');
+
+                ordersContainer.innerHTML = orders.map(order => {
+                    const statusInfo = getOrderStatusInfo(order.status || 'process');
+                    return `
+                    <div class="order-item bg-white rounded-xl p-6 mb-4 border-l-4 ${statusInfo.borderColor} shadow-md hover:shadow-xl transition-all duration-300" data-order-id="${order.id}">
+                        <!-- Order Header -->
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h3 class="font-bold text-lg text-gray-800">Order #${order.id.slice(-8).toUpperCase()}</h3>
+                                    <button onclick="copyOrderId('${order.id}')" class="text-gray-400 hover:text-green-600 transition-colors" title="Copy Order ID">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-sm text-gray-600 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    ${order.timestamp?.toDate().toLocaleDateString('id-ID', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </p>
+                            </div>
+                            <div class="flex flex-col gap-2 items-end">
+                                <span class="status-badge ${statusInfo.bgColor} ${statusInfo.textColor} flex items-center gap-2">
+                                    ${statusInfo.icon} ${statusInfo.text}
+                                </span>
+                                <span class="status-badge ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'} text-xs">
+                                    ${order.paymentStatus === 'paid' ? '✓ Sudah Bayar' : '⏳ Belum Bayar'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Timeline -->
+                        <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-3">Progress Pengiriman</h4>
+                            <div class="relative">
+                                <div class="flex justify-between items-center mb-2">
+                                    ${['process', 'packing', 'shipping', 'delivered'].map((step, index) => {
+                                        const stepInfo = getOrderStatusInfo(step);
+                                        const currentStep = ['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process');
+                                        const isActive = index <= currentStep;
+                                        return `
+                                        <div class="flex flex-col items-center flex-1">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'} font-bold text-sm mb-1 transition-all duration-300">
+                                                ${isActive ? '✓' : index + 1}
+                                            </div>
+                                            <span class="text-xs ${isActive ? 'text-green-600 font-semibold' : 'text-gray-500'} text-center">${stepInfo.shortText}</span>
+                                        </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                                <div class="relative h-1 bg-gray-300 rounded-full -mt-5 mb-8 mx-4">
+                                    <div class="absolute h-1 bg-green-500 rounded-full transition-all duration-500" style="width: ${(['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process') + 1) * 25}%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Shipping Info -->
+                            ${order.trackingNumber ? `
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                                    <div>
+                                        <span class="text-gray-600">Kurir:</span>
+                                        <span class="font-semibold text-gray-800 ml-1">${order.courierName || '-'}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">No. Resi:</span>
+                                        <span class="font-semibold text-gray-800 ml-1">${order.trackingNumber}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">Estimasi:</span>
+                                        <span class="font-semibold text-gray-800 ml-1">${order.estimatedDelivery || '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Order Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Produk Pesanan</h4>
+                                <div class="space-y-2">
+                                    ${order.items?.map(item => `
+                                        <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
+                                            <span class="text-gray-700">${item.product}</span>
+                                            <span class="text-gray-600">${item.quantity}kg × Rp ${formatPrice(item.price)}</span>
+                                        </div>
+                                    `).join('') || ''}
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Alamat Pengiriman</h4>
+                                <p class="text-sm text-gray-600 mb-4">${formatAddress(order)}</p>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-600 mb-1">Total Pembayaran</p>
+                                    <p class="text-3xl font-bold text-green-600">Rp ${formatPrice(order.total)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
+                            <button onclick="viewOrderDetails('${order.id}')" class="flex-1 md:flex-none bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Lihat Detail
+                            </button>
+                            <button onclick="downloadReceipt('${order.id}')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download
+                            </button>
+                            <button onclick="trackOrder('${order.id}')" class="flex-1 md:flex-none bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Lacak Pesanan
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading order history:', error);
+                document.getElementById('orders-container').innerHTML = '<p class="text-red-500 text-center">Gagal memuat riwayat pesanan</p>';
+            }
+        }
+
+        // Helper function to format address
+        function formatAddress(order) {
+            const addressFields = [
+                order.shippingAddress,
+                order.deliveryAddress,
+                order.address,
+                order.customerAddress
+            ];
+
+            for (const addr of addressFields) {
+                if (addr) {
+                    if (typeof addr === 'string') {
+                        return addr;
+                    } else if (typeof addr === 'object') {
+                        const parts = [];
+                        if (addr.street) parts.push(addr.street);
+                        if (addr.city) parts.push(addr.city);
+                        if (addr.province) parts.push(addr.province);
+                        if (addr.postalCode) parts.push(addr.postalCode);
+                        if (addr.country) parts.push(addr.country);
+                        return parts.join(', ');
+                    }
+                }
+            }
+            return 'Alamat tidak tersedia';
+        }
+
+        // Get order status info
+        function getOrderStatusInfo(status) {
+            const statusMap = {
+                'process': {
+                    text: 'Diproses',
+                    shortText: 'Proses',
+                    icon: '⏳',
+                    bgColor: 'bg-blue-100',
+                    textColor: 'text-blue-800',
+                    borderColor: 'border-blue-500'
+                },
+                'packing': {
+                    text: 'Sedang Dikemas',
+                    shortText: 'Dikemas',
+                    icon: '📦',
+                    bgColor: 'bg-yellow-100',
+                    textColor: 'text-yellow-800',
+                    borderColor: 'border-yellow-500'
+                },
+                'shipping': {
+                    text: 'Dalam Pengiriman',
+                    shortText: 'Dikirim',
+                    icon: '🚚',
+                    bgColor: 'bg-purple-100',
+                    textColor: 'text-purple-800',
+                    borderColor: 'border-purple-500'
+                },
+                'delivered': {
+                    text: 'Sampai Tujuan',
+                    shortText: 'Sampai',
+                    icon: '✅',
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-500'
+                },
+                'completed': {
+                    text: 'Selesai',
+                    shortText: 'Selesai',
+                    icon: '🎉',
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-500'
+                },
+                'cancelled': {
+                    text: 'Dibatalkan',
+                    shortText: 'Batal',
+                    icon: '❌',
+                    bgColor: 'bg-red-100',
+                    textColor: 'text-red-800',
+                    borderColor: 'border-red-500'
+                }
+            };
+            return statusMap[status] || statusMap['process'];
+        }
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-green-50', 'text-green-600', 'border-b-2', 'border-green-600');
+                btn.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-content`).classList.remove('hidden');
+            
+            // Add active class to selected tab button
+            const activeBtn = document.getElementById(`${tabName}-tab`);
+            activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700');
+            activeBtn.classList.add('active', 'bg-green-50', 'text-green-600', 'border-b-2', 'border-green-600');
+
+            // Load content based on tab
+            if (tabName === 'orders') {
+                loadOrderHistory();
+            } else if (tabName === 'history') {
+                loadShoppingHistory();
+            }
+        }
+
+        // Load shopping history
+        function loadShoppingHistory() {
+            const historyContainer = document.getElementById('history-container');
+            
+            const cartHistory = JSON.parse(localStorage.getItem(`cartHistory_${userUID}`)) || [];
+            
+            if (cartHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">📈</div>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Aktivitas</h3>
+                        <p class="text-gray-500">Riwayat aktivitas belanja Anda akan muncul di sini</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = cartHistory.map(activity => `
+                <div class="bg-white rounded-xl p-4 mb-3 border border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="text-2xl">${activity.action === 'add' ? '➕' : activity.action === 'remove' ? '➖' : '🛒'}</div>
+                        <div>
+                            <p class="font-semibold text-gray-800">${activity.productName}</p>
+                            <p class="text-sm text-gray-600">${activity.action === 'add' ? 'Ditambahkan ke keranjang' : 'Dihapus dari keranjang'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">${new Date(activity.timestamp).toLocaleDateString('id-ID')}</p>
+                        <p class="text-sm font-medium text-green-600">${activity.quantity} kg</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility functions
+        function formatPrice(price) {
+            return new Intl.NumberFormat('id-ID').format(Math.round(price));
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'pending': 'status-pending',
+                'paid': 'status-paid',
+                'processing': 'status-processing',
+                'completed': 'status-completed'
+            };
+            return classes[status] || 'status-pending';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'pending': 'Menunggu Bayar',
+                'paid': 'Dibayar',
+                'processing': 'Diproses',
+                'completed': 'Selesai'
+            };
+            return texts[status] || 'Unknown';
+        }
+
+        // Cart management
+        function removeFromCart(productName) {
+            if (confirm(`Hapus ${productName} dari keranjang?`)) {
+                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
+                delete cart[productName];
+                localStorage.setItem(`cart_${userUID}`, JSON.stringify(cart));
+                
+                // Add to history
+                addToCartHistory('remove', productName);
+                
+                loadCartItems();
+                loadUserStats();
+                showToast(`${productName} dihapus dari keranjang`);
+            }
+        }
+
+        function clearCart() {
+            if (confirm('Kosongkan semua item di keranjang?')) {
+                localStorage.setItem(`cart_${userUID}`, JSON.stringify({}));
+                loadCartItems();
+                loadUserStats();
+                showToast('Keranjang berhasil dikosongkan');
+            }
+        }
+
+        // Add activity to cart history
+        function addToCartHistory(action, productName, quantity = 1) {
+            const cartHistory = JSON.parse(localStorage.getItem(`cartHistory_${userUID}`)) || [];
+            cartHistory.unshift({
+                action,
+                productName,
+                quantity,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Keep only last 50 activities
+            if (cartHistory.length > 50) {
+                cartHistory.splice(50);
+            }
+            
+            localStorage.setItem(`cartHistory_${userUID}`, JSON.stringify(cartHistory));
+        }
+
+        // Navigation functions
+        function viewOrderDetails(orderId) {
+            // Redirect to pesanan.html with order ID
+            window.location.href = `pesanan.html?orderId=${orderId}`;
+        }
+
+        function trackOrder(orderId) {
+            // Redirect to tracking page
+            window.location.href = `pesanan.html?orderId=${orderId}`;
+        }
+
+        function downloadReceipt(orderId) {
+            showToast('Mengunduh receipt...', 'success');
+            
+            // Simple receipt download (you can enhance this with jsPDF)
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        function copyOrderId(orderId) {
+            navigator.clipboard.writeText(orderId).then(() => {
+                showToast('Order ID berhasil disalin!', 'success');
+            }).catch(() => {
+                showToast('Gagal menyalin Order ID', 'error');
+            });
+        }
+
+        async function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                try {
+                    // Sign out from Firebase if available
+                    if (window.signOut && window.firebaseAuth) {
+                        await signOut(firebaseAuth);
+                    }
+                } catch (error) {
+                    console.error('Error signing out from Firebase:', error);
+                }
+
+                // Clear local storage
+                localStorage.clear();
+
+                // Redirect to login page
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toast.className = `fixed top-4 right-4 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}`;
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-x-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
     </script>
 </body>
 </html>
