@@ -1,21 +1,15 @@
-# TODO: Update store.html with Authentication and Cart Enhancements
+# TODO: Fix Cart Data Sync to Firebase Database
 
-## Navigation UI Updates
-- [x] Replace login button in desktop navigation with auth-button-container HTML
-- [x] Replace login link in mobile menu with auth-button-container HTML
-
-## Script Functions Addition/Modification
-- [ ] Add authentication check functions (checkUserLogin, getUserUID, redirectToLogin)
-- [ ] Modify addToCart function to include authentication check and user-specific cart
-- [ ] Add addToCartHistory function
-- [ ] Modify updateCartCount to use user-specific cart and update multiple elements
-- [ ] Add checkLoginStatus function
-- [x] Add logoutUser function
-- [ ] Modify showCartNotification to accept productName parameter
-- [ ] Update DOMContentLoaded initialization to include checkLoginStatus
+## Cart Firebase Integration
+- [ ] Modify addToCart to call saveCartToFirebase after saving to localStorage
+- [ ] Fix updateCartItemQuantity to use user-specific cart key and save to Firebase
+- [ ] Fix removeCartItem to use user-specific cart key and save to Firebase
+- [ ] Fix updateCartDisplay to use user-specific cart key
+- [ ] Update auth state listener to call loadCart when user logs in
+- [ ] Ensure cart is cleared on logout
 
 ## Testing
-- [ ] Verify authentication flow works
-- [ ] Test cart operations for logged-in users
-- [ ] Check UI updates on login/logout
-- [ ] Ensure cart counts update correctly
+- [ ] Verify cart data is saved to Firebase "carts" collection
+- [ ] Test cart operations sync with Firebase
+- [ ] Check cart loads correctly on login
+- [ ] Ensure cart is cleared on logout

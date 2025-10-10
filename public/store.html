@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -1285,6 +1285,66 @@
                         </button>
                     </div>
                 `;
+                // Load user's cart from Firebase
+                loadCart();
+            } else {
+                currentUser = null;
+                userUID = null;
+                // Show login button
+                authContainer.innerHTML = `
+                    <button id="login-btn" onclick="window.location.href='login.html?redirect=store.html'" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300 font-medium flex items-center space-x-2">
+                        <span>Login</span>
+                    </button>
+                `;
+                // Update mobile menu
+                mobileAuthContainer.innerHTML = `
+                    <a href="login.html?redirect=store.html" class="flex items-center px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Login dengan Google
+                    </a>
+                `;
+                // Clear cart for logged out user
+                cartItems = {};
+                updateCartCount();
+            }
+        });
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            const authContainer = document.getElementById('auth-button-container');
+            const mobileAuthContainer = document.getElementById('mobile-auth-container');
+            if (user) {
+                currentUser = user;
+                userUID = user.uid;
+                // Show user menu with profile photo
+                authContainer.innerHTML = `
+                    <div id="user-menu" class="flex items-center space-x-3">
+                        <img id="user-avatar" src="${user.photoURL || 'https://via.placeholder.com/32x32?text=U'}" alt="User" class="w-8 h-8 rounded-full border-2 border-green-500 cursor-pointer" onclick="window.location.href='profil.html'">
+                        <span id="user-name" class="text-gray-700 font-medium">${user.displayName || user.email}</span>
+                        <button onclick="window.location.href='profil.html'" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm">
+                            Profile
+                        </button>
+                        <button onclick="logoutUser()" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
+                // Update mobile menu
+                mobileAuthContainer.innerHTML = `
+                    <div class="flex items-center justify-between px-3 py-2 bg-green-600 rounded transition-colors duration-300">
+                        <div class="flex items-center space-x-2">
+                            <img src="${user.photoURL || 'https://via.placeholder.com/24x24?text=U'}" alt="User" class="w-6 h-6 rounded-full border border-white">
+                            <span class="text-white text-sm">${user.displayName || user.email}</span>
+                        </div>
+                        <button onclick="logoutUser()" class="text-white hover:text-green-200 text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
             } else {
                 currentUser = null;
                 userUID = null;
@@ -1767,8 +1827,86 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log('Admin logged out successfully');
         }
 
+        // Save Cart to Firebase
+        async function saveCartToFirebase() {
+            if (!userUID) {
+                console.log('No user UID, cannot save cart to Firebase');
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, 'carts', userUID);
+                await setDoc(cartRef, {
+                    items: cartItems,
+                    lastUpdated: new Date()
+                });
+                console.log('Cart saved to Firebase for user:', userUID);
+            } catch (error) {
+                console.error('Error saving cart to Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                localStorage.setItem(cartKey, JSON.stringify(cartItems));
+                console.log('Cart saved to localStorage as fallback');
+            }
+        }
+
+        // Load Cart from Firebase
+        async function loadCartFromFirebase() {
+            if (!userUID) {
+                console.log('No user UID, cannot load cart from Firebase');
+                cartItems = {};
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, 'carts', userUID);
+                const cartSnap = await getDoc(cartRef);
+
+                if (cartSnap.exists()) {
+                    cartItems = cartSnap.data().items || {};
+                    console.log('Cart loaded from Firebase for user:', userUID, cartItems);
+                } else {
+                    // No Firebase cart, try localStorage
+                    const cartKey = `cart_${userUID}`;
+                    const cartData = localStorage.getItem(cartKey);
+                    cartItems = JSON.parse(cartData) || {};
+                    console.log('Cart loaded from localStorage for user:', userUID, cartItems);
+                }
+            } catch (error) {
+                console.error('Error loading cart from Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                const cartData = localStorage.getItem(cartKey);
+                cartItems = JSON.parse(cartData) || {};
+                console.log('Cart loaded from localStorage as fallback for user:', userUID, cartItems);
+            }
+        }
+
+        // Save Cart (to both Firebase and localStorage)
+        async function saveCart() {
+            if (!userUID) {
+                console.log('No user UID, cannot save cart');
+                return;
+            }
+
+            // Save to Firebase first
+            await saveCartToFirebase();
+
+            // Also save to localStorage as backup
+            const cartKey = `cart_${userUID}`;
+            localStorage.setItem(cartKey, JSON.stringify(cartItems));
+            console.log('Cart saved for user:', userUID);
+            updateCartCount();
+        }
+
+        // Load Cart (from Firebase with localStorage fallback)
+        async function loadCart() {
+            await loadCartFromFirebase();
+            updateCartCount();
+        }
+
         // Cart functions
-        function addToCart(productName, price, button) {
+        async function addToCart(productName, price, button) {
             // Check if user is logged in
             if (!checkUserLogin()) {
                 redirectToLogin();
@@ -1781,17 +1919,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             const img = card.querySelector('img');
             const image = img ? img.src : '';
 
-            // Get user-specific cart key
-            const cartKey = `cart_${getUserUID()}`;
-
-            // Get existing cart
-            let cart = JSON.parse(localStorage.getItem(cartKey)) || {};
-
             // Add or update item
-            if (cart[productName]) {
-                cart[productName].quantity += quantity;
+            if (cartItems[productName]) {
+                cartItems[productName].quantity += quantity;
             } else {
-                cart[productName] = {
+                cartItems[productName] = {
                     product: productName,
                     price: price,
                     quantity: quantity,
@@ -1800,10 +1932,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             // Save cart
-            localStorage.setItem(cartKey, JSON.stringify(cart));
-
-            // Update cart count
-            updateCartCount();
+            await saveCart();
 
             // Show animation
             button.classList.add('add-to-cart-success');
