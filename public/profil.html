@@ -12,7 +12,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -36,6 +36,7 @@
         window.orderBy = orderBy;
         window.getDocs = getDocs;
         window.onAuthStateChanged = onAuthStateChanged;
+        window.signOut = signOut;
     </script>
 
     <style>
@@ -895,9 +896,21 @@
             });
         }
 
-        function logout() {
+        async function logout() {
             if (confirm('Yakin ingin logout?')) {
+                try {
+                    // Sign out from Firebase if available
+                    if (window.signOut && window.firebaseAuth) {
+                        await signOut(firebaseAuth);
+                    }
+                } catch (error) {
+                    console.error('Error signing out from Firebase:', error);
+                }
+
+                // Clear local storage
                 localStorage.clear();
+
+                // Redirect to login page
                 window.location.href = 'login.html';
             }
         }
