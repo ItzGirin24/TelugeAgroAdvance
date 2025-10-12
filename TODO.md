@@ -1,9 +1,16 @@
-# TODO: Auto-switch to Aktivitas Belanja Tab on Order Completion in Profile
+# TODO: Add Mobile-Friendly Progress Bar to Profil Order Cards
 
 ## Steps to Complete:
 
-1. **Create TODO.md** - Track progress for the task. (Completed)
-2. **Edit public/profil.html** - Add logic in loadOrderHistory() to check for completed orders ('delivered' or 'completed' status) and automatically switch to 'history' tab if currently on 'orders' tab. (Completed)
-3. **Update TODO.md** - Mark the edit as completed and note any followup testing. (Completed)
-4. **Enhance History Tab** - Modify loadShoppingHistory() to include completed orders from Firebase alongside cart activities, displaying order details like ID, date, and total. (Completed)
-5. **Test the Change** - Run local server (e.g., node server.js), login as user, navigate to profil.html, switch to Orders tab, verify auto-switch to History tab if any completed order exists; check that completed orders appear in History tab; test real-time update by changing order status in Firebase console. (Pending)
+1. **Update TODO.md** - Add this new task section to track progress. (Completed)
+2. **Edit public/profil.html** - Modify the `renderOrders` function to insert a 4-step horizontal progress bar in each order card, dynamically filled based on order status (process=step1, packing=step2, shipping/delivered=step3, completed=step4; cancelled as error state). Use Tailwind for responsive design (compact on mobile). Position after order header and before shipping info. (Pending)
+3. **Update TODO.md** - Mark the edit as completed. (Pending)
+4. **Test the Change** - Run local server (`node server.js`), view profil.html on mobile (Chrome DevTools), verify progress bar renders correctly for various statuses (simulate via Firebase console), ensure it fits horizontally without overflow, and updates on status changes. (Pending)
+
+# TODO: Fix Total Belanja to Show Lifetime Spending in Profil.html
+
+## Steps to Complete:
+
+1. **Edit public/profil.html** - Update loadUserStats() to query all order statuses ['process', 'packing', 'shipping', 'delivered', 'completed'] for totalOrders and totalSpent. Recalculate loyaltyPoints from full totalSpent. (Pending)
+2. **Update TODO.md** - Mark the edit as completed. (Pending)
+3. **Test the Change** - Reload profil.html, verify Total Belanja includes completed orders from Aktivitas Belanja tab. (Pending)

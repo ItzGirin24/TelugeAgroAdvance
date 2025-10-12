@@ -517,10 +517,6 @@
                     <div class="text-3xl mb-2">🛒</div>
                     <div class="font-semibold text-gray-700">Lihat Keranjang</div>
                 </a>
-                <button onclick="clearCart()" class="glass-container rounded-xl p-6 text-center hover:shadow-lg transition-all">
-                    <div class="text-3xl mb-2">🗑️</div>
-                    <div class="font-semibold text-gray-700">Kosongkan Keranjang</div>
-                </button>
                 <a href="https://wa.me/628112638318" target="_blank" class="glass-container rounded-xl p-6 text-center hover:shadow-lg transition-all">
                     <div class="text-3xl mb-2">📞</div>
                     <div class="font-semibold text-gray-700">Bantuan</div>
@@ -634,7 +630,7 @@
             const ordersQuery = query(
                 collection(firebaseDb, 'orders'),
                 where('email', '==', userEmail),
-                where('status', 'in', ['process', 'packing', 'shipping'])
+                where('status', 'in', ['process', 'packing', 'shipping', 'delivered', 'completed'])
             );
 
                     const ordersSnapshot = await getDocs(ordersQuery);
@@ -1069,6 +1065,7 @@
                 loadOrderHistory();
             } else if (tabName === 'history') {
                 loadShoppingHistory();
+                loadUserStats(); // Refresh stats to include completed orders
             }
         }
 
