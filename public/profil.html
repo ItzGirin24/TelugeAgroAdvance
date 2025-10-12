@@ -13,7 +13,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
@@ -37,6 +37,7 @@
         window.getDocs = getDocs;
         window.onAuthStateChanged = onAuthStateChanged;
         window.signOut = signOut;
+        window.onSnapshot = onSnapshot;
     </script>
 
     <style>
@@ -126,6 +127,131 @@
         .cart-item {
             background: #f8fafc;
             border-left: 4px solid #22c55e;
+        }
+
+        /* Mobile Menu Animation */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        /* Progress Timeline Styles */
+        .progress-timeline {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            margin: 16px 0;
+        }
+
+        .step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 3;
+            transition: all 0.3s ease;
+        }
+
+        .step-circle.active {
+            background-color: #22c55e;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+        }
+
+        .step-circle.inactive {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .step-circle.completed,
+        .step-circle.current {
+            background-color: #22c55e;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+        }
+
+        .step-label {
+            font-size: 12px;
+            text-align: center;
+            font-weight: 500;
+            min-width: 60px;
+            transition: color 0.3s ease;
+        }
+
+        .step-label.active {
+            color: #16a34a;
+        }
+
+        .step-label.inactive {
+            color: #9ca3af;
+        }
+
+        .step-connector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(50%);
+            right: -50%;
+            height: 2px;
+            background-color: #e5e7eb;
+            z-index: 1;
+            transition: background-color 0.3s ease;
+        }
+
+        .step-connector.active {
+            background-color: #22c55e;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 2px;
+            background-color: #22c55e;
+            border-radius: 1px;
+            z-index: 0;
+            transition: width 0.5s ease;
+        }
+
+        @media (max-width: 640px) {
+            .progress-timeline {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .step {
+                flex: none;
+                width: 25%;
+            }
+
+            .step-connector {
+                display: none;
+            }
+
+            .progress-fill {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -334,9 +460,20 @@
             offset: 100
         });
 
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+        });
+
         // Global variables
         let currentUser = null;
         let userUID = null;
+        let ordersUnsubscribe = null;
+        let cartItems = {};
+        let allProducts = [];
 
         // Initialize when page loads
         window.addEventListener('load', async () => {
@@ -344,7 +481,7 @@
                 userUID = localStorage.getItem('userUID') || 'guest';
                 await loadUserProfile();
                 await loadUserStats();
-                await loadCartItems();
+                await loadCart();
                 
                 // Set up auth state listener for Firebase users
                 if (window.firebaseAuth) {
@@ -352,6 +489,7 @@
                         if (user) {
                             currentUser = user;
                             userUID = user.uid;
+                            loadCart(); // Reload cart on auth change
                         }
                     });
                 }
@@ -401,10 +539,9 @@
         // Load user statistics
         async function loadUserStats() {
             try {
-                // Load cart count
-                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
-                const cartItems = Object.values(cart);
-                const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                // Load cart count from global cartItems
+                const items = Object.values(cartItems);
+                const cartCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 document.getElementById('cartItemsCount').textContent = cartCount;
 
                 // Load order statistics from Firebase
@@ -436,223 +573,303 @@
             }
         }
 
-        // Load cart items
-        async function loadCartItems() {
-            try {
-                const cartContainer = document.getElementById('cart-items-container');
-                const cartEmpty = document.getElementById('cart-empty');
-                
-                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
-                const cartItems = Object.values(cart);
+        // Load cart from Firebase (with localStorage fallback)
+        async function loadCart() {
+            if (!userUID || userUID === 'guest') {
+                cartItems = {};
+                renderCartItems();
+                return;
+            }
 
-                if (cartItems.length === 0) {
-                    cartContainer.innerHTML = '';
-                    cartEmpty.classList.remove('hidden');
-                    return;
+            try {
+                // Try Firebase first
+                if (window.firebaseDb && window.doc && window.getDoc) {
+                    const cartRef = doc(firebaseDb, 'carts', userUID);
+                    const cartSnap = await getDoc(cartRef);
+
+                    if (cartSnap.exists()) {
+                        cartItems = cartSnap.data().items || {};
+                        console.log('Cart loaded from Firebase');
+                    } else {
+                        // Fallback to localStorage
+                        const cartData = localStorage.getItem(`cart_${userUID}`);
+                        cartItems = JSON.parse(cartData) || {};
+                        console.log('Cart loaded from localStorage');
+                    }
+                } else {
+                    // Only localStorage if no Firebase
+                    const cartData = localStorage.getItem(`cart_${userUID}`);
+                    cartItems = JSON.parse(cartData) || {};
                 }
 
-                cartEmpty.classList.add('hidden');
-                
-                cartContainer.innerHTML = cartItems.map(item => `
-                    <div class="cart-item rounded-xl p-4 mb-4 flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <img src="https://via.placeholder.com/60x60?text=🍌" alt="${item.product}" class="w-15 h-15 rounded-lg object-cover">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">${item.product}</h3>
-                                <p class="text-sm text-gray-600">Rp ${formatPrice(item.price)}/kg</p>
-                                <p class="text-sm font-medium text-green-600">${item.quantity} kg</p>
+                // Load products for images
+                await loadProducts();
+
+                renderCartItems();
+                loadUserStats();
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                // Fallback to localStorage
+                const cartData = localStorage.getItem(`cart_${userUID}`);
+                cartItems = JSON.parse(cartData) || {};
+                renderCartItems();
+                loadUserStats();
+            }
+        }
+
+        // Load products for images
+        async function loadProducts() {
+            if (!window.firebaseDb) return;
+
+            try {
+                const productsQuery = query(collection(firebaseDb, 'products'), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(productsQuery);
+
+                allProducts = [];
+                querySnapshot.forEach((doc) => {
+                    const productData = doc.data();
+                    allProducts.push({
+                        id: doc.id,
+                        title: productData.title || productData.name, // Handle different field names
+                        image: productData.image || 'https://via.placeholder.com/60x60?text=🍌',
+                        price: productData.price || 0
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Render cart items
+        function renderCartItems() {
+            const cartContainer = document.getElementById('cart-items-container');
+            const cartEmpty = document.getElementById('cart-empty');
+            
+            const items = Object.values(cartItems);
+
+            if (items.length === 0) {
+                cartContainer.innerHTML = '';
+                cartEmpty.classList.remove('hidden');
+                return;
+            }
+
+            cartEmpty.classList.add('hidden');
+            
+            cartContainer.innerHTML = items.map(item => {
+                // Find product image
+                const productData = allProducts.find(p => p.title === item.product);
+                const productImage = productData ? productData.image : 'https://via.placeholder.com/60x60?text=🍌';
+
+                return `
+                    <div class="cart-item rounded-xl p-6 mb-4 flex items-start justify-between gap-4">
+                        <div class="flex items-start space-x-6 flex-1">
+                            <img src="${productImage}" alt="${item.product}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0" onerror="this.src='https://via.placeholder.com/64x64?text=🍌'">
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-800 mb-1 truncate">${item.product}</h3>
+                                <p class="text-sm text-gray-600 mb-1">Rp ${formatPrice(item.price)}/kg</p>
+                                <p class="text-sm font-medium text-green-600">Jumlah: ${item.quantity} kg</p>
                             </div>
                         </div>
-                        <div class="text-right">
+                        <div class="flex flex-col items-end gap-2 flex-shrink-0">
                             <p class="text-lg font-bold text-gray-800">Rp ${formatPrice(item.price * item.quantity)}</p>
-                            <button onclick="removeFromCart('${item.product}')" class="text-sm text-red-500 hover:text-red-700 transition-colors">
+                            <button onclick="removeFromCart('${item.product}')" class="text-sm text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded">
                                 Hapus
                             </button>
                         </div>
                     </div>
-                `).join('');
-
-            } catch (error) {
-                console.error('Error loading cart items:', error);
-            }
+                `;
+            }).join('');
         }
 
         // Load order history with real-time updates
-        async function loadOrderHistory() {
-            try {
-                const ordersContainer = document.getElementById('orders-container');
-                const ordersEmpty = document.getElementById('orders-empty');
+        function loadOrderHistory() {
+            const ordersContainer = document.getElementById('orders-container');
+            const ordersEmpty = document.getElementById('orders-empty');
 
-                if (!window.firebaseDb) {
-                    ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Riwayat pesanan tidak tersedia</p>';
-                    return;
-                }
+            if (!window.firebaseDb) {
+                ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Riwayat pesanan tidak tersedia</p>';
+                return;
+            }
 
-                const userEmail = localStorage.getItem('userEmail');
-                if (!userEmail) {
-                    ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Silakan login terlebih dahulu</p>';
-                    return;
-                }
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                ordersContainer.innerHTML = '<p class="text-gray-500 text-center">Silakan login terlebih dahulu</p>';
+                return;
+            }
 
-                // Show loading
-                ordersContainer.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div></div>';
+            // Unsubscribe previous listener if exists
+            if (ordersUnsubscribe) {
+                ordersUnsubscribe();
+            }
 
-                const ordersQuery = query(
-                    collection(firebaseDb, 'orders'),
-                    where('email', '==', userEmail)
-                );
+            // Show loading
+            ordersContainer.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div></div>';
 
-                const ordersSnapshot = await getDocs(ordersQuery);
-                const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const ordersQuery = query(
+                collection(firebaseDb, 'orders'),
+                where('email', '==', userEmail)
+            );
 
-                // Sort by timestamp desc
-                orders.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
+            // Set up real-time listener
+            ordersUnsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+                try {
+                    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                if (orders.length === 0) {
-                    ordersContainer.innerHTML = '';
-                    ordersEmpty.classList.remove('hidden');
-                    return;
-                }
+                    // Sort by timestamp desc
+                    orders.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
 
-                ordersEmpty.classList.add('hidden');
+                    if (orders.length === 0) {
+                        ordersContainer.innerHTML = '';
+                        ordersEmpty.classList.remove('hidden');
+                        return;
+                    }
 
-                ordersContainer.innerHTML = orders.map(order => {
-                    const statusInfo = getOrderStatusInfo(order.status || 'process');
-                    return `
-                    <div class="order-item bg-white rounded-xl p-6 mb-4 border-l-4 ${statusInfo.borderColor} shadow-md hover:shadow-xl transition-all duration-300" data-order-id="${order.id}">
-                        <!-- Order Header -->
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <h3 class="font-bold text-lg text-gray-800">Order #${order.id.slice(-8).toUpperCase()}</h3>
-                                    <button onclick="copyOrderId('${order.id}')" class="text-gray-400 hover:text-green-600 transition-colors" title="Copy Order ID">
+                    ordersEmpty.classList.add('hidden');
+
+                    ordersContainer.innerHTML = orders.map(order => {
+                        const statusInfo = getOrderStatusInfo(order.status || 'process');
+                        return `
+                        <div class="order-item bg-white rounded-xl p-6 mb-4 border-l-4 ${statusInfo.borderColor} shadow-md hover:shadow-xl transition-all duration-300" data-order-id="${order.id}">
+                            <!-- Order Header -->
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h3 class="font-bold text-lg text-gray-800">Order #${order.id.slice(-8).toUpperCase()}</h3>
+                                        <button onclick="copyOrderId('${order.id}')" class="text-gray-400 hover:text-green-600 transition-colors" title="Copy Order ID">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <p class="text-sm text-gray-600 flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
-                                    </button>
+                                        ${order.timestamp?.toDate().toLocaleDateString('id-ID', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </p>
                                 </div>
-                                <p class="text-sm text-gray-600 flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    ${order.timestamp?.toDate().toLocaleDateString('id-ID', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </p>
+                                <div class="flex flex-col gap-2 items-end">
+                                    <span class="status-badge ${statusInfo.bgColor} ${statusInfo.textColor} flex items-center gap-2">
+                                        ${statusInfo.icon} ${statusInfo.text}
+                                    </span>
+                                    <span class="status-badge ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'} text-xs">
+                                        ${order.paymentStatus === 'paid' ? '✓ Sudah Bayar' : '⏳ Belum Bayar'}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex flex-col gap-2 items-end">
-                                <span class="status-badge ${statusInfo.bgColor} ${statusInfo.textColor} flex items-center gap-2">
-                                    ${statusInfo.icon} ${statusInfo.text}
-                                </span>
-                                <span class="status-badge ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'} text-xs">
-                                    ${order.paymentStatus === 'paid' ? '✓ Sudah Bayar' : '⏳ Belum Bayar'}
-                                </span>
-                            </div>
-                        </div>
 
-                        <!-- Progress Timeline -->
-                        <div class="mb-6 bg-gray-50 rounded-lg p-4">
-                            <h4 class="text-sm font-semibold text-gray-700 mb-3">Progress Pengiriman</h4>
-                            <div class="relative">
-                                <div class="flex justify-between items-center mb-2">
+                            <!-- Progress Timeline -->
+                            <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Progress Pengiriman</h4>
+                                <div class="progress-timeline">
                                     ${['process', 'packing', 'shipping', 'delivered'].map((step, index) => {
                                         const stepInfo = getOrderStatusInfo(step);
                                         const currentStep = ['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process');
-                                        const isActive = index <= currentStep;
+                                        const isCompleted = index < currentStep || (currentStep === 3 && index === currentStep);
+                                        const isCurrent = index === currentStep && currentStep < 3;
+                                        const isPending = index > currentStep;
+                                        const isLabelActive = index <= currentStep;
+                                        const isConnectorActive = index < currentStep;
+                                        const circleClass = isCompleted ? 'completed' : isCurrent ? 'current' : 'inactive';
+                                        const labelClass = isLabelActive ? 'active' : 'inactive';
+                                        const circleContent = isCompleted ? '✓' : (index + 1);
                                         return `
-                                        <div class="flex flex-col items-center flex-1">
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center ${isActive ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'} font-bold text-sm mb-1 transition-all duration-300">
-                                                ${isActive ? '✓' : index + 1}
+                                        <div class="step">
+                                            <div class="step-circle ${circleClass}">
+                                                ${circleContent}
                                             </div>
-                                            <span class="text-xs ${isActive ? 'text-green-600 font-semibold' : 'text-gray-500'} text-center">${stepInfo.shortText}</span>
+                                            <span class="step-label ${labelClass}">${stepInfo.shortText}</span>
+                                            ${index < 3 ? `<div class="step-connector ${isConnectorActive ? 'active' : ''}"></div>` : ''}
                                         </div>
                                         `;
                                     }).join('')}
+                                    <div class="progress-fill" style="width: ${(['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process') + 1) * 25}%"></div>
                                 </div>
-                                <div class="relative h-1 bg-gray-300 rounded-full -mt-5 mb-8 mx-4">
-                                    <div class="absolute h-1 bg-green-500 rounded-full transition-all duration-500" style="width: ${(['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process') + 1) * 25}%"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Shipping Info -->
-                            ${order.trackingNumber ? `
-                            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                                    <div>
-                                        <span class="text-gray-600">Kurir:</span>
-                                        <span class="font-semibold text-gray-800 ml-1">${order.courierName || '-'}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-600">No. Resi:</span>
-                                        <span class="font-semibold text-gray-800 ml-1">${order.trackingNumber}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-600">Estimasi:</span>
-                                        <span class="font-semibold text-gray-800 ml-1">${order.estimatedDelivery || '-'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
 
-                        <!-- Order Details -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Produk Pesanan</h4>
-                                <div class="space-y-2">
-                                    ${order.items?.map(item => `
-                                        <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
-                                            <span class="text-gray-700">${item.product}</span>
-                                            <span class="text-gray-600">${item.quantity}kg × Rp ${formatPrice(item.price)}</span>
+                                <!-- Shipping Info -->
+                                ${order.trackingNumber ? `
+                                <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                                        <div>
+                                            <span class="text-gray-600">Kurir:</span>
+                                            <span class="font-semibold text-gray-800 ml-1">${order.courierName || '-'}</span>
                                         </div>
-                                    `).join('') || ''}
+                                        <div>
+                                            <span class="text-gray-600">No. Resi:</span>
+                                            <span class="font-semibold text-gray-800 ml-1">${order.trackingNumber}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-600">Estimasi:</span>
+                                            <span class="font-semibold text-gray-800 ml-1">${order.estimatedDelivery || '-'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- Order Details -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Produk Pesanan</h4>
+                                    <div class="space-y-2">
+                                        ${order.items?.map(item => `
+                                            <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
+                                                <span class="text-gray-700">${item.product}</span>
+                                                <span class="text-gray-600">${item.quantity}kg × Rp ${formatPrice(item.price)}</span>
+                                            </div>
+                                        `).join('') || ''}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Alamat Pengiriman</h4>
+                                    <p class="text-sm text-gray-600 mb-4">${formatAddress(order)}</p>
+                                    <div class="text-right">
+                                        <p class="text-sm text-gray-600 mb-1">Total Pembayaran</p>
+                                        <p class="text-3xl font-bold text-green-600">Rp ${formatPrice(order.total)}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Alamat Pengiriman</h4>
-                                <p class="text-sm text-gray-600 mb-4">${formatAddress(order)}</p>
-                                <div class="text-right">
-                                    <p class="text-sm text-gray-600 mb-1">Total Pembayaran</p>
-                                    <p class="text-3xl font-bold text-green-600">Rp ${formatPrice(order.total)}</p>
-                                </div>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
+                                <button onclick="viewOrderDetails('${order.id}')" class="flex-1 md:flex-none bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Lihat Detail
+                                </button>
+                                <button onclick="downloadReceipt('${order.id}')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Download
+                                </button>
+                                <button onclick="trackOrder('${order.id}')" class="flex-1 md:flex-none bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Lacak Pesanan
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
-                            <button onclick="viewOrderDetails('${order.id}')" class="flex-1 md:flex-none bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                                Lihat Detail
-                            </button>
-                            <button onclick="downloadReceipt('${order.id}')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Download
-                            </button>
-                            <button onclick="trackOrder('${order.id}')" class="flex-1 md:flex-none bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                                Lacak Pesanan
-                            </button>
-                        </div>
-                    </div>
-                    `;
-                }).join('');
-
-            } catch (error) {
-                console.error('Error loading order history:', error);
-                document.getElementById('orders-container').innerHTML = '<p class="text-red-500 text-center">Gagal memuat riwayat pesanan</p>';
-            }
+                        `;
+                    }).join('');
+                } catch (error) {
+                    console.error('Error processing order snapshot:', error);
+                    ordersContainer.innerHTML = '<p class="text-red-500 text-center">Gagal memuat riwayat pesanan</p>';
+                }
+            }, (error) => {
+                console.error('Error listening to orders:', error);
+                ordersContainer.innerHTML = '<p class="text-red-500 text-center">Gagal memuat riwayat pesanan</p>';
+            });
         }
 
         // Helper function to format address
@@ -825,26 +1042,58 @@
             return texts[status] || 'Unknown';
         }
 
+        // Save cart to Firebase (with localStorage backup)
+        async function saveCart() {
+            if (!userUID || userUID === 'guest') {
+                // Only localStorage for guests
+                const cartKey = `cart_${userUID}`;
+                localStorage.setItem(cartKey, JSON.stringify(cartItems));
+                return;
+            }
+
+            try {
+                if (window.firebaseDb && window.doc && window.setDoc) {
+                    const cartRef = doc(firebaseDb, 'carts', userUID);
+                    await setDoc(cartRef, {
+                        items: cartItems,
+                        lastUpdated: new Date()
+                    }, { merge: true });
+                    console.log('Cart saved to Firebase');
+                }
+
+                // Always save to localStorage as backup
+                const cartKey = `cart_${userUID}`;
+                localStorage.setItem(cartKey, JSON.stringify(cartItems));
+            } catch (error) {
+                console.error('Error saving cart to Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                localStorage.setItem(cartKey, JSON.stringify(cartItems));
+            }
+        }
+
         // Cart management
         function removeFromCart(productName) {
             if (confirm(`Hapus ${productName} dari keranjang?`)) {
-                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
-                delete cart[productName];
-                localStorage.setItem(`cart_${userUID}`, JSON.stringify(cart));
-                
-                // Add to history
-                addToCartHistory('remove', productName);
-                
-                loadCartItems();
-                loadUserStats();
-                showToast(`${productName} dihapus dari keranjang`);
+                if (cartItems[productName]) {
+                    delete cartItems[productName];
+                    saveCart();
+                    
+                    // Add to history
+                    addToCartHistory('remove', productName);
+                    
+                    renderCartItems();
+                    loadUserStats();
+                    showToast(`${productName} dihapus dari keranjang`);
+                }
             }
         }
 
         function clearCart() {
             if (confirm('Kosongkan semua item di keranjang?')) {
-                localStorage.setItem(`cart_${userUID}`, JSON.stringify({}));
-                loadCartItems();
+                cartItems = {};
+                saveCart();
+                renderCartItems();
                 loadUserStats();
                 showToast('Keranjang berhasil dikosongkan');
             }

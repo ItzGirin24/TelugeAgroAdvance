@@ -2231,9 +2231,8 @@ document.getElementById('cart-overlay').addEventListener('click', closeCart);
             updateCartDisplay();
         }
 
-function updateCartDisplay() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || {};
-            const cartItems = document.getElementById('cart-items');
+        function updateCartDisplay() {
+            const cartItemsElement = document.getElementById('cart-items');
             const cartSubtotal = document.getElementById('cart-subtotal');
             const cartTotalPrice = document.getElementById('cart-total-price');
             const checkoutBtn = document.getElementById('checkout-btn');
@@ -2241,8 +2240,8 @@ function updateCartDisplay() {
             let subtotal = 0;
             let totalItems = 0;
 
-            if (Object.keys(cart).length === 0) {
-                cartItems.innerHTML = `
+            if (Object.keys(cartItems).length === 0) {
+                cartItemsElement.innerHTML = `
                     <div class="cart-empty">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
@@ -2253,7 +2252,7 @@ function updateCartDisplay() {
                 `;
                 checkoutBtn.disabled = true;
             } else {
-                cartItems.innerHTML = Object.values(cart).map(item => {
+                cartItemsElement.innerHTML = Object.values(cartItems).map(item => {
                     const itemTotal = item.price * item.quantity;
                     subtotal += itemTotal;
                     totalItems += item.quantity;
@@ -2305,27 +2304,25 @@ function updateCartDisplay() {
             }
         }
 
-        function updateCartItemQuantity(productName, newQuantity) {
-            const cart = JSON.parse(localStorage.getItem('cart')) || {};
+        async function updateCartItemQuantity(productName, newQuantity) {
             newQuantity = parseInt(newQuantity);
 
             if (newQuantity <= 0) {
-                delete cart[productName];
+                delete cartItems[productName];
             } else {
-                if (cart[productName]) {
-                    cart[productName].quantity = newQuantity;
+                if (cartItems[productName]) {
+                    cartItems[productName].quantity = newQuantity;
                 }
             }
 
-            localStorage.setItem('cart', JSON.stringify(cart));
+            await saveCart();
             updateCartDisplay();
             showToast('Keranjang diperbarui!');
         }
 
-        function removeCartItem(productName) {
-            const cart = JSON.parse(localStorage.getItem('cart')) || {};
-            delete cart[productName];
-            localStorage.setItem('cart', JSON.stringify(cart));
+        async function removeCartItem(productName) {
+            delete cartItems[productName];
+            await saveCart();
             updateCartDisplay();
             showToast('Item dihapus dari keranjang!');
         }

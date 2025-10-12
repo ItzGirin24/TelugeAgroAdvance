@@ -23,7 +23,7 @@
                 <a href="store.html" class="hover:text-green-300">Toko</a>
                 <a href="cart.html" class="hover:text-green-300">Keranjang</a>
             </nav>
-            <button id="hamburger-btn" class="md:hidden focus:outline-none">
+            <button id="mobile-menu-btn" class="md:hidden focus:outline-none">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <line x1="3" y1="12" x2="21" y2="12"></line>
                     <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -32,7 +32,7 @@
             </button>
         </div>
         <!-- Mobile Menu -->
-        <nav id="mobile-menu" class="hidden bg-green-600 text-white px-4 py-2 md:hidden">
+        <nav id="mobile-menu" class="mobile-menu md:hidden bg-green-600 text-white px-4 py-2">
             <a href="index.html" class="block py-2 hover:text-green-300">Beranda</a>
             <a href="leadingpage.html" class="block py-2 hover:text-green-300">Tentang</a>
             <a href="store.html" class="block py-2 hover:text-green-300">Toko</a>
@@ -51,10 +51,7 @@
                 <div class="space-y-4">
                     <!-- Search Type Selection -->
                     <div class="flex gap-4">
-                        <label class="flex items-center">
-                            <input type="radio" name="searchType" value="orderId" checked class="mr-2">
-                            <span class="text-sm">Cari dengan ID Pesanan</span>
-                        </label>
+                 
                         <label class="flex items-center">
                             <input type="radio" name="searchType" value="email" class="mr-2">
                             <span class="text-sm">Cari dengan Email</span>
@@ -220,6 +217,16 @@
         }
         .text-shadow-green {
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Mobile Menu Animation */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
         }
     </style>
 
@@ -763,9 +770,12 @@
             }
         });
 
-        // Hamburger menu toggle
-        document.getElementById('hamburger-btn').addEventListener('click', () => {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
         });
     </script>
 </body>
