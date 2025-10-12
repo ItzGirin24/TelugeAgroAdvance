@@ -574,13 +574,6 @@
                             </svg>
                             Manage Products
                         </button>
-                        <button onclick="logoutAdminKeepLogo()"
-                            class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-9A2.25 2.25 0 002.25 5.25v13.5A2.25 2.25 0 004.5 21h9a2.25 2.25 0 002.25-2.25V15M12 9l3-3m0 0l3 3m-3-3v12"/>
-                            </svg>
-                            Logout
-                        </button>
                         <button onclick="manageOrders()"
                             class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -595,16 +588,6 @@
                             </svg>
                             Manage Web
                         </button>
-                    </div>
-                `;
-            } else {
-                // Show only logout for non-admin users
-                menuContent.innerHTML = `
-                    <div class="p-4 border-b border-gray-100">
-                        <p class="text-sm font-semibold text-gray-800">Account</p>
-                        <p class="text-xs text-gray-400">User Menu</p>
-                    </div>
-                    <div class="flex flex-col">
                         <button onclick="logoutAdminKeepLogo()"
                             class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -614,6 +597,41 @@
                         </button>
                     </div>
                 `;
+            } else {
+                // Show login form for non-admin users
+                menuContent.innerHTML = `
+                    <div class="p-4 border-b border-gray-100">
+                        <p class="text-sm font-semibold text-gray-800">Admin Login</p>
+                        <p class="text-xs text-gray-400">Masuk untuk mengakses panel admin</p>
+                    </div>
+                    <form id="adminLoginForm" class="p-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="adminUsername" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="teluge@admin.app" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="adminPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="teluge2025" required>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium">Login</button>
+                        <div id="loginError" class="hidden text-red-500 text-xs text-center mt-2">Username atau password salah!</div>
+                    </form>
+                `;
+                // Add event listener for login form
+                document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const username = document.getElementById('adminUsername').value;
+                    const password = document.getElementById('adminPassword').value;
+                    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                        localStorage.setItem('adminLoggedIn', 'true');
+                        showToast('Login admin berhasil!', 'success');
+                        hideAdminMenu();
+                        showAdminMenu(); // Refresh menu
+                        loadOrders(); // Load orders after login
+                    } else {
+                        document.getElementById('loginError').classList.remove('hidden');
+                    }
+                });
             }
 
             adminMenu.classList.remove('hidden');

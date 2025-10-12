@@ -13,7 +13,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
@@ -127,6 +127,65 @@
         .cart-item {
             background: #f8fafc;
             border-left: 4px solid #22c55e;
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+        }
+
+        @media (max-width: 640px) {
+            .cart-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .cart-item .flex.items-center.justify-between {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .cart-item h3 {
+                font-size: 1rem;
+            }
+
+            .cart-item p {
+                font-size: 0.875rem;
+            }
+        }
+
+        #cart-summary {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #cart-summary .bg-white {
+            border-left: 4px solid #22c55e;
+        }
+
+        @media (max-width: 640px) {
+            #cart-summary .flex.justify-between {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: right;
+            }
+
+            #cart-summary .text-lg {
+                font-size: 1.125rem;
+            }
         }
 
         /* Mobile Menu Animation */
@@ -138,7 +197,6 @@
         .mobile-menu.active {
             transform: translateX(0);
         }
-<<<<<<< HEAD
 
         /* Progress Timeline Styles */
         .progress-timeline {
@@ -254,8 +312,6 @@
                 display: none;
             }
         }
-=======
->>>>>>> 15d1071f3d7c915ea717893c0012c779efa99532
     </style>
 </head>
 <body>
@@ -392,6 +448,29 @@
                         <div id="cart-items-container">
                             <!-- Cart items will be loaded here -->
                         </div>
+
+                        <!-- Cart Summary -->
+                        <div id="cart-summary" class="mt-6 hidden">
+                            <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Subtotal</span>
+                                        <span id="subtotal" class="font-semibold">Rp 0</span>
+                                    </div>
+          
+                                </div>
+                                <div class="border-t pt-4 mb-4">
+                                    <div class="flex justify-between text-lg font-bold">
+                                        <span>Total</span>
+                                        <span id="grand-total" class="text-green-600">Rp 0</span>
+                                    </div>
+                                </div>
+                                <a href="cart.html" class="w-full block bg-green-600 text-white py-3 px-6 rounded-lg text-center font-semibold hover:bg-green-700 transition-all duration-300 text-lg">
+                                    Checkout Sekarang
+                                </a>
+                            </div>
+                        </div>
+
                         <div id="cart-empty" class="text-center py-12 hidden">
                             <div class="text-6xl mb-4">🛒</div>
                             <h3 class="text-xl font-bold text-gray-700 mb-2">Keranjang Masih Kosong</h3>
@@ -647,41 +726,57 @@
         function renderCartItems() {
             const cartContainer = document.getElementById('cart-items-container');
             const cartEmpty = document.getElementById('cart-empty');
+            const cartSummary = document.getElementById('cart-summary');
+            const subtotalEl = document.getElementById('subtotal');
+            const grandTotalEl = document.getElementById('grand-total');
             
             const items = Object.values(cartItems);
 
             if (items.length === 0) {
                 cartContainer.innerHTML = '';
                 cartEmpty.classList.remove('hidden');
+                cartSummary.classList.add('hidden');
                 return;
             }
 
             cartEmpty.classList.add('hidden');
             
+            // Calculate totals
+            const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+            const grandTotal = subtotal 
+            
+            subtotalEl.textContent = `Rp ${formatPrice(subtotal)}`;
+            grandTotalEl.textContent = `Rp ${formatPrice(grandTotal)}`;
+            
             cartContainer.innerHTML = items.map(item => {
                 // Find product image
                 const productData = allProducts.find(p => p.title === item.product);
-                const productImage = productData ? productData.image : 'https://via.placeholder.com/60x60?text=🍌';
+                const productImage = productData ? productData.image : 'https://via.placeholder.com/64x64?text=🍌';
 
                 return `
-                    <div class="cart-item rounded-xl p-6 mb-4 flex items-start justify-between gap-4">
-                        <div class="flex items-start space-x-6 flex-1">
-                            <img src="${productImage}" alt="${item.product}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0" onerror="this.src='https://via.placeholder.com/64x64?text=🍌'">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-800 mb-1 truncate">${item.product}</h3>
-                                <p class="text-sm text-gray-600 mb-1">Rp ${formatPrice(item.price)}/kg</p>
-                                <p class="text-sm font-medium text-green-600">Jumlah: ${item.quantity} kg</p>
+                    <div class="cart-item rounded-xl p-4 mb-4 bg-white shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 flex-1">
+                            <img src="${productImage}" alt="${item.product}" class="w-16 h-16 rounded-lg object-cover shadow-md" onerror="this.src='https://via.placeholder.com/64x64?text=🍌'">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-800 text-sm sm:text-base truncate">${item.product}</h3>
+                                <p class="text-xs sm:text-sm text-gray-600">Rp ${formatPrice(item.price)} / kg</p>
+                                <p class="text-xs sm:text-sm font-medium text-green-600">${item.quantity} kg</p>
                             </div>
                         </div>
-                        <div class="flex flex-col items-end gap-2 flex-shrink-0">
-                            <p class="text-lg font-bold text-gray-800">Rp ${formatPrice(item.price * item.quantity)}</p>
-                            <button onclick="removeFromCart('${item.product}')" class="text-sm text-red-500 hover:text-red-700 transition-colors px-3 py-1 rounded">
-                                Hapus
+                        <div class="flex items-center justify-between w-full sm:w-auto gap-2 sm:gap-0">
+                            <p class="text-base sm:text-lg font-bold text-gray-800">Rp ${formatPrice(item.price * item.quantity)}</p>
+                            <button onclick="removeFromCart('${item.product}')" class="p-2 text-red-500 hover:text-red-700 transition-colors rounded-full hover:bg-red-50" title="Hapus item">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
+            
+            cartSummary.classList.remove('hidden');
         }
 
         // Load order history with real-time updates
@@ -1045,58 +1140,26 @@
             return texts[status] || 'Unknown';
         }
 
-        // Save cart to Firebase (with localStorage backup)
-        async function saveCart() {
-            if (!userUID || userUID === 'guest') {
-                // Only localStorage for guests
-                const cartKey = `cart_${userUID}`;
-                localStorage.setItem(cartKey, JSON.stringify(cartItems));
-                return;
-            }
-
-            try {
-                if (window.firebaseDb && window.doc && window.setDoc) {
-                    const cartRef = doc(firebaseDb, 'carts', userUID);
-                    await setDoc(cartRef, {
-                        items: cartItems,
-                        lastUpdated: new Date()
-                    }, { merge: true });
-                    console.log('Cart saved to Firebase');
-                }
-
-                // Always save to localStorage as backup
-                const cartKey = `cart_${userUID}`;
-                localStorage.setItem(cartKey, JSON.stringify(cartItems));
-            } catch (error) {
-                console.error('Error saving cart to Firebase:', error);
-                // Fallback to localStorage
-                const cartKey = `cart_${userUID}`;
-                localStorage.setItem(cartKey, JSON.stringify(cartItems));
-            }
-        }
-
         // Cart management
         function removeFromCart(productName) {
             if (confirm(`Hapus ${productName} dari keranjang?`)) {
-                if (cartItems[productName]) {
-                    delete cartItems[productName];
-                    saveCart();
-                    
-                    // Add to history
-                    addToCartHistory('remove', productName);
-                    
-                    renderCartItems();
-                    loadUserStats();
-                    showToast(`${productName} dihapus dari keranjang`);
-                }
+                const cart = JSON.parse(localStorage.getItem(`cart_${userUID}`)) || {};
+                delete cart[productName];
+                localStorage.setItem(`cart_${userUID}`, JSON.stringify(cart));
+                
+                // Add to history
+                addToCartHistory('remove', productName);
+                
+                loadCartItems();
+                loadUserStats();
+                showToast(`${productName} dihapus dari keranjang`);
             }
         }
 
         function clearCart() {
             if (confirm('Kosongkan semua item di keranjang?')) {
-                cartItems = {};
-                saveCart();
-                renderCartItems();
+                localStorage.setItem(`cart_${userUID}`, JSON.stringify({}));
+                loadCartItems();
                 loadUserStats();
                 showToast('Keranjang berhasil dikosongkan');
             }
