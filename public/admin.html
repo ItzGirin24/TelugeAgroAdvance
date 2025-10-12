@@ -504,7 +504,8 @@
 
                 querySnapshot.forEach((doc) => {
                     const order = doc.data();
-                    allOrders.push({ id: doc.id, ...order });
+                    const paymentStatus = order.paymentStatus || 'pending';
+                    allOrders.push({ id: doc.id, ...order, paymentStatus });
                     
                     const status = order.status || 'pending';
                     
@@ -515,7 +516,7 @@
                     if (status === 'completed' || status === 'delivered') {
                         completedCount++;
                     }
-                    if (order.paymentStatus === 'paid') {
+                    if (paymentStatus === 'paid') {
                         totalRevenue += order.total || 0;
                     }
                 });
@@ -923,9 +924,10 @@
 
                 // Show appropriate notification based on payment status
                 if (newPaymentStatus === 'paid') {
-                    showToast('Status pembayaran berhasil diupdate menjadi SUDAH BAYAR', 'success');
+                    showToast(`Order ${orderId.slice(-8).toUpperCase()} berhasil ditandai SUDAH BAYAR`, 'success');
+                    console.log(`Email notification sent for order ${orderId} - Payment confirmed`);
                 } else {
-                    showToast('Status pembayaran berhasil diupdate menjadi BELUM BAYAR', 'success');
+                    showToast(`Order ${orderId.slice(-8).toUpperCase()} berhasil ditandai BELUM BAYAR`, 'success');
                 }
             } catch (error) {
                 console.error('Error updating payment status:', error);
@@ -1220,7 +1222,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Status Pembayaran Saat Ini:</label>
                             <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 rounded-full ${order.paymentStatus === 'paid' ? 'bg-green-500' : 'bg-orange-500'}"></div>
-                                <span class="text-sm font-medium ${order.paymentStatus === 'paid' ? 'text-green-700' : 'text-orange-700'}">
+                                <span class="text-sm font-medium ${order.paymentStatus === 'paid' ? 'text-green-700' : 'text-orange-700'}" title="${order.paymentStatus === 'paid' ? 'Pembayaran telah dikonfirmasi' : 'Menunggu konfirmasi pembayaran'}">
                                     ${order.paymentStatus === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
                                 </span>
                                 ${order.paymentStatus === 'paid' ? '<span class="text-xs text-green-600 ml-2">✓ Pembayaran diterima</span>' : '<span class="text-xs text-orange-600 ml-2">Menunggu pembayaran</span>'}
@@ -1379,6 +1381,7 @@
         window.loadProducts = loadProducts;
         window.moduleUpdateOrderStatus = updateOrderStatus; // Store the real function
         window.updateOrderStatus = updateOrderStatus; // Replace the placeholder
+        window.updatePaymentStatus = updatePaymentStatus; // Make updatePaymentStatus global
         window.loadOrders = loadOrders;
         window.loadWebContent = loadWebContent;
         window.saveWebContent = saveWebContent;
