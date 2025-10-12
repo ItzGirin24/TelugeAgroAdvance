@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
@@ -38,6 +38,7 @@
         window.onAuthStateChanged = onAuthStateChanged;
         window.signOut = signOut;
         window.onSnapshot = onSnapshot;
+        window.updateDoc = updateDoc;
     </script>
 
     <style>
@@ -803,7 +804,7 @@
             const ordersQuery = query(
                 collection(firebaseDb, 'orders'),
                 where('email', '==', userEmail),
-                where('status', 'not-in', ['delivered', 'completed'])
+                where('status', 'not-in', ['delivered', 'completed', 'cancelled'])
             );
 
             // Set up real-time listener
@@ -863,6 +864,12 @@
                             <!-- Progress Timeline -->
                             <div class="mb-6 bg-gray-50 rounded-lg p-4">
                                 <h4 class="text-sm font-semibold text-gray-700 mb-3">Progress Pengiriman</h4>
+                                ${order.status === 'cancelled' ? `
+                                <div class="text-center py-4">
+                                    <div class="text-red-500 text-2xl mb-2">❌</div>
+                                    <p class="text-sm text-gray-600">Pesanan telah dibatalkan</p>
+                                </div>
+                                ` : `
                                 <div class="progress-timeline">
                                     ${['process', 'packing', 'shipping', 'delivered'].map((step, index) => {
                                         const stepInfo = getOrderStatusInfo(step);
@@ -887,6 +894,7 @@
                                     }).join('')}
                                     <div class="progress-fill" style="width: ${(['process', 'packing', 'shipping', 'delivered'].indexOf(order.status || 'process') + 1) * 25}%"></div>
                                 </div>
+                                `}
 
                                 <!-- Shipping Info -->
                                 ${order.trackingNumber ? `
@@ -933,14 +941,23 @@
                             </div>
 
                             <!-- Action Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                ${(['process', 'packing'].includes(order.status) && order.paymentStatus !== 'paid') ? `
+                                <button onclick="cancelOrder('${order.id}')" class="flex-1 md:flex-none bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Batal Pesanan
+                                </button>
+                                ` : ''}
 
                                 <button onclick="downloadReceipt('${order.id}')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     Download
-                                    
                                 </button>
+                            </div>
 
                         `;
                     }).join('');
@@ -1085,7 +1102,7 @@
                         const ordersQuery = query(
                             collection(firebaseDb, 'orders'),
                             where('email', '==', userEmail),
-                            where('status', 'in', ['delivered', 'completed'])
+                            where('status', 'in', ['delivered', 'completed', 'cancelled'])
                         );
                         const ordersSnapshot = await getDocs(ordersQuery);
                         completedOrders = ordersSnapshot.docs.map(doc => ({
@@ -1340,6 +1357,38 @@
             }).catch(() => {
                 showToast('Gagal menyalin Order ID', 'error');
             });
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+                return;
+            }
+
+            try {
+                if (!window.firebaseDb || !window.updateDoc) {
+                    showToast('Tidak dapat terhubung ke database', 'error');
+                    return;
+                }
+
+                const orderRef = doc(firebaseDb, 'orders', orderId);
+                await updateDoc(orderRef, {
+                    status: 'cancelled',
+                    cancelledAt: new Date(),
+                    cancelledBy: 'customer'
+                });
+
+                showToast('Pesanan berhasil dibatalkan', 'success');
+
+                // Reload order history to reflect changes
+                loadOrderHistory();
+
+                // Switch to history tab to show cancelled order
+                showTab('history');
+
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                showToast('Gagal membatalkan pesanan', 'error');
+            }
         }
 
         async function logout() {
