@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-Your-Client-Key"></script>
 </head>
 <body class="bg-green-50 text-gray-800">
     <!-- Header -->
@@ -161,6 +162,9 @@
                         <div>
                             <h4 class="font-semibold text-orange-800">Pembayaran Belum Diterima</h4>
                             <p class="text-orange-700">Silakan segera lakukan pembayaran agar pesanan dapat diproses.</p>
+                            <button id="payNowBtn" class="mt-3 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition text-sm font-medium">
+                                Bayar Sekarang
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -776,6 +780,88 @@
 
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('active');
+        });
+
+        // Pay Now button functionality
+        document.getElementById('payNowBtn').addEventListener('click', async () => {
+            if (!currentOrderId) {
+                alert('ID pesanan tidak ditemukan. Silakan coba lagi.');
+                return;
+            }
+
+            try {
+                // Get current order data
+                const orderDoc = await getDoc(doc(db, 'orders', currentOrderId));
+                if (!orderDoc.exists()) {
+                    alert('Data pesanan tidak ditemukan.');
+                    return;
+                }
+
+                const order = orderDoc.data();
+
+                // Prepare transaction data for Midtrans
+                const transactionData = {
+                    transaction_details: {
+                        order_id: currentOrderId,
+                        gross_amount: order.total
+                    },
+                    customer_details: {
+                        first_name: order.customerName || order.name || 'Customer',
+                        email: order.email,
+                        phone: order.phone || ''
+                    },
+                    item_details: [
+                        {
+                            id: 'order-' + currentOrderId,
+                            price: order.total,
+                            quantity: 1,
+                            name: 'Pesanan Teluge Agro'
+                        }
+                    ]
+                };
+
+                console.log('Sending transaction data to Midtrans:', transactionData);
+
+                // Get snap token from server
+                const response = await fetch('/api/get-snap-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transactionData)
+                });
+
+                const result = await response.json();
+                console.log('Midtrans response:', result);
+
+                if (result.token) {
+                    // Open Midtrans Snap payment page
+                    window.snap.pay(result.token, {
+                        onSuccess: function(result) {
+                            console.log('Payment success:', result);
+                            alert('Pembayaran berhasil! Pesanan Anda akan segera diproses.');
+                            // Refresh the page to update status
+                            location.reload();
+                        },
+                        onPending: function(result) {
+                            console.log('Payment pending:', result);
+                            alert('Pembayaran sedang diproses. Status akan diperbarui secara otomatis.');
+                        },
+                        onError: function(result) {
+                            console.log('Payment error:', result);
+                            alert('Terjadi kesalahan dalam pembayaran. Silakan coba lagi.');
+                        },
+                        onClose: function() {
+                            console.log('Payment popup closed');
+                        }
+                    });
+                } else {
+                    alert('Gagal mendapatkan token pembayaran. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Error initiating payment:', error);
+                alert('Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.');
+            }
         });
     </script>
 </body>

@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-Your-Production-Key"></script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -324,11 +325,10 @@
         }
     </script>
 
-    <br>
-        <br>
-            <br>
-                <br>
-
+-    <br>
+-        <br>
+-            <br>
+-                <br>
     <!-- Navigation -->
     <nav class="fixed top-0 w-full z-40 transition-all duration-300" id="navbar" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -943,6 +943,12 @@
                             <!-- Action Buttons -->
                             <div class="flex flex-col sm:flex-row gap-3">
                                 ${(['process', 'packing'].includes(order.status) && order.paymentStatus !== 'paid') ? `
+                                <button onclick="payNow('${order.id}')" class="flex-1 md:flex-none bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                    </svg>
+                                    Bayar Sekarang
+                                </button>
                                 <button onclick="cancelOrder('${order.id}')" class="flex-1 md:flex-none bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1410,15 +1416,123 @@
             }
         }
 
+        // Pay Now function for order payment
+        async function payNow(orderId) {
+            if (!orderId) {
+                alert('ID pesanan tidak ditemukan. Silakan coba lagi.');
+                return;
+            }
+
+            try {
+                // Get current order data
+                const orderDoc = await getDoc(doc(firebaseDb, 'orders', orderId));
+                if (!orderDoc.exists()) {
+                    alert('Data pesanan tidak ditemukan.');
+                    return;
+                }
+
+                const order = orderDoc.data();
+
+                // Prepare transaction data for Midtrans
+                const transactionData = {
+                    transaction_details: {
+                        order_id: orderId,
+                        gross_amount: order.total
+                    },
+                    customer_details: {
+                        first_name: order.customerName || order.name || 'Customer',
+                        email: order.email,
+                        phone: order.phone || ''
+                    },
+                    item_details: order.items.map(item => ({
+                        id: item.product.replace(/\s+/g, '-').toLowerCase(),
+                        price: item.price,
+                        quantity: item.quantity,
+                        name: item.product
+                    }))
+                };
+
+                console.log('Sending transaction data to Midtrans:', transactionData);
+
+                // Get snap token from server
+                const response = await fetch('/api/get-snap-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transactionData)
+                });
+
+                const result = await response.json();
+                console.log('Midtrans response:', result);
+
+                if (result.token) {
+                    // Open Midtrans Snap payment page
+                    window.snap.pay(result.token, {
+                        onSuccess: async function(result) {
+                            console.log('Payment success:', result);
+                            try {
+                                // Update payment status in Firebase
+                                const orderRef = doc(firebaseDb, 'orders', orderId);
+                                await updateDoc(orderRef, {
+                                    paymentStatus: 'paid',
+                                    paymentDate: new Date()
+                                });
+
+                                // Update UI immediately
+                                const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+                                if (orderElement) {
+                                    // Hide pay button
+                                    const payButton = orderElement.querySelector('button[onclick*="payNow"]');
+                                    if (payButton) payButton.style.display = 'none';
+
+                                    // Update payment status badge
+                                    const paymentBadge = orderElement.querySelector('.status-badge.text-xs');
+                                    if (paymentBadge) {
+                                        paymentBadge.className = 'status-badge bg-green-100 text-green-800 text-xs';
+                                        paymentBadge.textContent = '✓ Sudah Bayar';
+                                    }
+                                }
+
+                                alert('Pembayaran berhasil! Pesanan Anda akan segera diproses.');
+                                // Refresh the page to update status
+                                location.reload();
+                            } catch (error) {
+                                console.error('Error updating payment status:', error);
+                                alert('Pembayaran berhasil, tetapi gagal memperbarui status. Silakan refresh halaman.');
+                                location.reload();
+                            }
+                        },
+                        onPending: function(result) {
+                            console.log('Payment pending:', result);
+                            alert('Pembayaran sedang diproses. Status akan diperbarui secara otomatis.');
+                        },
+                        onError: function(result) {
+                            console.log('Payment error:', result);
+                            alert('Terjadi kesalahan dalam pembayaran. Silakan coba lagi.');
+                        },
+                        onClose: function() {
+                            console.log('Payment popup closed');
+                        }
+                    });
+                } else {
+                    alert('Gagal mendapatkan token pembayaran. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Error initiating payment:', error);
+                alert('Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.');
+            }
+        }
+
         // Toast notification
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toast-message');
-            
+
             toast.className = `fixed top-4 right-4 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}`;
             toastMessage.textContent = message;
             toast.classList.remove('translate-x-full');
-            
+
             setTimeout(() => {
                 toast.classList.add('translate-x-full');
             }, 3000);
