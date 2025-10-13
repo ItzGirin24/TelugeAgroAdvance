@@ -1955,15 +1955,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         function updateCartCount() {
             let totalItems = 0;
-            if (userUID) {
-                // User is logged in, use their specific cart
-                const cartKey = `cart_${userUID}`;
-                const cart = JSON.parse(localStorage.getItem(cartKey)) || {};
-                totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+            if (userUID && cartItems) {
+                // User is logged in, use cartItems loaded from Firebase
+                totalItems = Object.values(cartItems).reduce((sum, item) => sum + item.quantity, 0);
             } else {
                 // User not logged in, cart count should be 0
-                // Optionally clear any existing cart data for non-logged in users
-                localStorage.removeItem('cart');
                 totalItems = 0;
             }
 

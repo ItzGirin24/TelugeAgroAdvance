@@ -121,30 +121,53 @@ app.get('/api/midtrans-transactions', async (req, res) => {
 });
 
 app.post('/api/get-snap-token', async (req, res) => {
-    console.log('📦 Transaction Data Diterima:', req.body);
+    console.log('📦 Transaction Data Diterima:', JSON.stringify(req.body, null, 2));
+    console.log('MIDTRANS SERVER KEY:', process.env.MIDTRANS_SERVER_KEY ? 'Loaded' : 'Missing');
+    console.log('MIDTRANS SERVER KEY Value:', process.env.MIDTRANS_SERVER_KEY);
+
+    // Use sandbox URL if MIDTRANS_SANDBOX is set to true
+    const baseUrl = process.env.MIDTRANS_SANDBOX === 'true' ? 'https://app.sandbox.midtrans.com' : 'https://app.midtrans.com';
+    const url = `${baseUrl}/snap/v1/transactions`;
+
+    console.log('Using Midtrans URL:', url);
+
+    // Create authorization header
+    const authString = process.env.MIDTRANS_SERVER_KEY + ':';
+    const authBase64 = Buffer.from(authString).toString('base64');
+    console.log('Authorization Header:', 'Basic ' + authBase64);
+
     try {
-  const response = await fetch('https://app.midtrans.com/snap/v1/transactions', {
-
-
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + Buffer.from(process.env.MIDTRANS_SERVER_KEY + ':').toString('base64')
+                'Authorization': 'Basic ' + authBase64
             },
             body: JSON.stringify(req.body)
         });
 
         const result = await response.json();
-        console.log('📩 Midtrans Raw Response:', result);
+        console.log('📩 Midtrans Response Status:', response.status);
+        console.log('📩 Midtrans Raw Response:', JSON.stringify(result, null, 2));
 
-        if (result.token) {
+        if (response.ok && result.token) {
             res.json({ token: result.token });
         } else {
-            res.status(400).json({ error: 'Failed to get snap token' });
+            console.error('❌ Midtrans API Error:', result);
+            console.error('❌ Response Status:', response.status);
+            console.error('❌ Error Messages:', result.error_messages);
+
+            // Return user-friendly error message
+            const errorMessage = result.error_messages ? result.error_messages.join(', ') : 'Failed to get snap token';
+            res.status(response.status).json({
+                error: 'Failed to get snap token',
+                details: errorMessage,
+                status: response.status
+            });
         }
     } catch (error) {
         console.error('Error getting snap token:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 });
 
