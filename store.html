@@ -1,0 +1,2363 @@
+    <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelugeAgro - Online Store</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/ItzGirin24/TelugeAgro/refs/heads/main/logo%20Teluge.jpg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16a34a;
+        }
+
+        /* Gradient Backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+        }
+        
+        .gradient-bg-light {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        /* Glass Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #22c55e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Product Card Animations */
+        .product-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.3);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+            z-index: 1;
+        }
+        
+        .product-card:hover::before {
+            left: 100%;
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .admin-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .admin-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Toast Animation */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Button Animations */
+        .btn-bounce {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .btn-bounce:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        /* Cart Icon Animation */
+        .cart-shake {
+            animation: cartShake 0.6s ease-in-out;
+        }
+        
+        @keyframes cartShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* Price Tag Animation */
+        .price-tag {
+            position: relative;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .price-tag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+        }
+
+        /* Quantity Selector */
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-selector:focus-within {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+        
+        .quantity-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .quantity-btn:hover {
+            background: #16a34a;
+            transform: scale(1.1);
+        }
+        
+        .quantity-input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 60px;
+            height: 40px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Mobile Menu Animation */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        /* Floating Cart */
+        .floating-cart {
+            position: fixed;
+            bottom: 10px; /* Increased bottom spacing to avoid overlap */
+            right: 20px;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .floating-cart:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Cart Notification Popup */
+        .cart-notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 90vw;
+        }
+
+        .cart-notification.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .cart-notification.cart-updated {
+            animation: cartBounce 0.6s ease;
+        }
+
+        @keyframes cartBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
+            50% { transform: translateX(-50%) translateY(-10px) scale(1.05); }
+        }
+
+        .cart-notification-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .cart-notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 8px;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .cart-notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Cart Float Button */
+        .cart-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 180px; /* Increased bottom spacing to avoid overlap */
+            right: 20px;
+            background-color: #22c55e;
+            color: white;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 24px;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .cart-float:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 2px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .cart-float .cart-count-float {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        /* WhatsApp Float Button */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 100px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+            margin-bottom: 10px; /* Added margin to separate from cart float */
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 2px 15px rgba(37, 211, 102, 0.4);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Filter Tabs */
+        .filter-tab {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-tab.active {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+            transform: scale(1.05);
+        }
+        
+        .filter-tab:hover:not(.active) {
+            background: #f1f5f9;
+            border-color: #22c55e;
+            transform: translateY(-2px);
+        }
+
+        /* Product Badge */
+        .product-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+            animation: pulse 2s infinite;
+        }
+        
+        .product-badge.new {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        
+        .product-badge.organic {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .search-input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+            outline: none;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            transition: color 0.3s ease;
+        }
+        
+        .search-input:focus + .search-icon {
+            color: #22c55e;
+        }
+
+        /* Responsive Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        
+        @media (max-width: 640px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 16px;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state img {
+            width: 200px;
+            height: 200px;
+            opacity: 0.5;
+            margin-bottom: 24px;
+        }
+
+        /* Loading State */
+        .product-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 16px;
+            height: 300px;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Add to Cart Success Animation */
+        .add-to-cart-success {
+            animation: addToCartSuccess 0.8s ease;
+        }
+        
+        @keyframes addToCartSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background-color: #10b981; }
+            100% { transform: scale(1); }
+        }
+
+        /* Cart Styles */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cart-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-header {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .cart-items {
+            padding: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+        }
+
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 16px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-quantity-control {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .cart-quantity-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cart-quantity-btn:hover {
+            background: #16a34a;
+        }
+
+        .cart-quantity-input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 40px;
+            height: 32px;
+            font-weight: bold;
+        }
+
+        .cart-remove-btn {
+            color: #ef4444;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cart-remove-btn:hover {
+            background: #fef2f2;
+        }
+
+        .cart-summary {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .cart-summary-item {
+            display: flex;
+            justify-content: between;
+            margin-bottom: 8px;
+        }
+
+        .cart-total {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 16px;
+            margin-top: 16px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .cart-checkout-btn {
+            width: 100%;
+            background: #fbbf24;
+            color: #22c55e;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .cart-checkout-btn:hover:not(:disabled) {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .cart-checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .cart-empty img {
+            width: 120px;
+            height: 120px;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .hero-text { font-size: 2rem; }
+            .product-card { margin-bottom: 16px; }
+            .floating-cart { bottom: 100px; right: 16px; }
+            .whatsapp-float { bottom: 40px; right: 16px; }
+            .admin-panel { bottom: 16px; left: 16px; }
+            .cart-sidebar { width: 100%; right: -100%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <h3 class="text-xl font-semibold text-gray-700">Memuat Toko TelugeAgro...</h3>
+        </div>
+    </div>
+
+    <!-- Error Message Container -->
+    <div id="loading-error" class="hidden fixed inset-0 bg-white z-50 flex items-center justify-center p-4">
+        <div class="text-center max-w-md">
+            <h3 class="text-2xl font-bold text-red-600 mb-4">Gagal Memuat Produk</h3>
+            <p class="text-gray-700 mb-6">Terjadi kesalahan saat memuat produk. Silakan coba muat ulang halaman atau periksa koneksi internet Anda.</p>
+            <button onclick="location.reload()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors duration-300 font-semibold">Muat Ulang</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-40 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <img src="logo Teluge.jpg" alt="TelugeAgro Logo" class="w-10 h-10 md:w-12 md:h-12 rounded-full">
+                    <span class="text-xl md:text-2xl font-bold text-white">TelugeAgro</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="leadingpage.html" class="text-white hover:text-green-200 transition-colors duration-300 font-medium">Beranda</a>
+                    <a href="leadingpage.html#about" class="text-white hover:text-green-200 transition-colors duration-300 font-medium">Tentang</a>
+                    <a href="#products" class="text-white hover:text-green-200 transition-colors duration-300 font-medium">Produk</a>
+                    <a href="leadingpage.html#contact" class="text-white hover:text-green-200 transition-colors duration-300 font-medium">Kontak</a>
+                    <!-- Login/Profile Button -->
+                    <div id="auth-button-container">
+                        <button id="login-btn" onclick="window.location.href='login.html?redirect=store.html'" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300 font-medium flex items-center space-x-2">
+                            <span>Login</span>
+                        </button>
+                        <div id="user-menu" class="hidden flex items-center space-x-3">
+                            <img id="user-avatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-green-500">
+                            <span id="user-name" class="text-gray-700 font-medium">User</span>
+                            <button onclick="window.location.href='profil.html'" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm">
+                                Profile
+                            </button>
+                            <button onclick="logoutUser()" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cart Icon -->
+                    <a href="cart.html" class="relative text-white hover:text-green-200 transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+                        </svg>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">0</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-white hover:text-green-200 transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0 bg-green-700 border-t border-green-600">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="leadingpage.html" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Beranda</a>
+                <a href="leadingpage.html#about" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Tentang</a>
+                <a href="#products" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Produk</a>
+                <a href="leadingpage.html#contact" class="block px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">Kontak</a>
+                <div id="mobile-auth-container"></div>
+                <a href="cart.html" class="flex items-center px-3 py-2 bg-white text-green-600 rounded font-semibold hover:bg-green-50 transition-colors duration-300">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+                    </svg>
+                    Keranjang (<span id="cart-count-mobile">0</span>)
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[60vh] flex items-center gradient-bg overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute transform rotate-12 -top-20 -right-20 w-96 h-96 rounded-full border-4 border-white"></div>
+            <div class="absolute transform -rotate-12 -bottom-20 -left-20 w-96 h-96 rounded-full border-4 border-white"></div>
+        </div>
+
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center" data-aos="fade-up" data-aos-duration="1000">
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+                    🍌 Toko Online <span class="text-yellow-300">TelugeAgro</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-green-100 mb-8 max-w-3xl mx-auto">
+                    Belanja Pisang Terbaik Langsung dari Kebun. Segar, Berkualitas, dan Siap Kirim ke Seluruh Indonesia!
+                </p>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto mb-8" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-yellow-300">🚚</div>
+                        <p class="text-green-100 font-medium">Gratis Ongkir</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-yellow-300">⭐</div>
+                        <p class="text-green-100 font-medium">Kualitas Terbaik</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-yellow-300">📱</div>
+                        <p class="text-green-100 font-medium">Pesan Mudah</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search and Filter Section -->
+    <section class="py-8 bg-white border-b">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-6 items-center justify-between">
+                <!-- Search Bar -->
+                <div class="search-container flex-1 max-w-md" data-aos="fade-right">
+                    <input type="text" id="search-input" placeholder="Cari produk pisang..." class="search-input">
+                    <svg class="search-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="flex flex-wrap gap-3" data-aos="fade-left">
+                    <button class="filter-tab active" data-filter="all">Semua Produk</button>
+                    <button class="filter-tab" data-filter="berkualitas">Berkualitas</button>
+                    <button class="filter-tab" data-filter="organic">Organik</button>
+                    <button class="filter-tab" data-filter="export">Ekspor</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-16 gradient-bg-light">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Loading State -->
+            <div id="products-loading" class="products-grid mb-16">
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="products-grid mb-16" style="display: none;">
+                <!-- Products will be loaded from Firebase -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-products" class="empty-state hidden">
+                <div class="text-8xl mb-6">🍌</div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-2">Belum Ada Produk</h3>
+                <p class="text-gray-500 mb-6">Admin belum menambahkan produk. Silakan cek kembali nanti!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel">
+        <button class="admin-btn" id="accountBtn" title="Admin Panel">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M5 21c0-3 6-3 7-3s7 0 7 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Admin Menu -->
+    <div id="adminMenu" class="hidden fixed bottom-20 left-6 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 min-w-[240px]">
+        <div class="p-4 border-b border-gray-100">
+            <p class="text-sm font-semibold text-gray-800">TelugeAgro Admin</p>
+            <p class="text-xs text-gray-400">Product Manager</p>
+        </div>
+        <div class="flex flex-col">
+            <button onclick="showAddProductModal()" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Tambah Produk
+            </button>
+            <button onclick="window.location.href='admin.html'" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                Kelola Pesanan
+            </button>
+            <button onclick="logoutAdmin()" class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="glass rounded-2xl p-8 w-80 max-w-full mx-4">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                    Login
+                </button>
+                <button type="button" id="loginCancel" class="w-full mt-3 text-gray-600 hover:text-gray-800 transition-colors">
+                    Cancel
+                </button>
+            </form>
+            <p id="loginError" class="text-red-600 mt-3 text-center hidden"></p>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-60">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+            <h2 id="productModalTitle" class="text-2xl font-bold text-center text-gray-800 mb-6">Tambah Produk</h2>
+            <form id="productForm" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="productTitle" class="block text-sm font-medium text-gray-700 mb-2">Nama Produk</label>
+                        <input type="text" id="productTitle" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-2">Harga (Rp/kg)</label>
+                        <input type="number" id="productPrice" step="100" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                </div>
+                <div>
+                    <label for="productDescription" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                    <textarea id="productDescription" rows="3" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"></textarea>
+                </div>
+                <div>
+                    <label for="productImage" class="block text-sm font-medium text-gray-700 mb-2">URL Gambar</label>
+                    <input type="url" id="productImage" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="https://example.com/image.jpg">
+                </div>
+                <div>
+                    <label for="productCategory" class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select id="productCategory" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">Pilih Kategori</option>
+                        <option value="berkualitas">Berkualitas</option>
+                        <option value="organic">Organik</option>
+                        <option value="export">Ekspor</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" id="cancelProductBtn" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+     <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="logo Teluge.jpg" alt="TelugeAgro Logo" class="w-12 h-12 rounded-full">
+                        <span class="text-2xl font-bold">TelugeAgro</span>
+                    </div>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        Pemasok pisang premium dari Purworejo, Jawa Tengah, Indonesia. Berkomitmen untuk memberikan kualitas terbaik dengan praktik pertanian berkelanjutan.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="https://www.instagram.com/teluge_agro" class="bg-gray-800 p-3 rounded-full hover:bg-green-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.facebook.com/TelugeAgro" class="bg-gray-800 p-3 rounded-full hover:bg-green-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Menu</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Beranda</a></li>
+                        <li><a href="#about" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Tentang</a></li>
+                        <li><a href="#products" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Produk</a></li>
+                        <li><a href="store.html" class="text-gray-300 hover:text-green-400 transition-colors duration-300">Toko</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Kontak</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>Purworejo, Jawa Tengah</li>
+                        <li>+62 811-2638-318</li>
+                        <li>teluge.agro@gmail.com</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">© 2017 TelugeAgro. Semua hak dilindungi undang-undang.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Float Button -->
+    <div class="cart-float" onclick="window.location.href='cart.html'" title="Lihat Keranjang">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+        </svg>
+        <span id="cart-count-float" class="cart-count-float">0</span>
+    </div>
+
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/628112638318?text=Halo%20TelugeAgro,%20saya%20tertarik%20dengan%20produk%20pisang%20Anda!"
+       class="whatsapp-float"
+       target="_blank"
+       rel="noopener noreferrer"
+       title="Hubungi WhatsApp">
+        📱
+    </a>
+    <!-- Cart Overlay -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h2 class="text-xl font-bold flex items-center">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+                </svg>
+                Keranjang Belanja
+            </h2>
+            <button id="close-cart" class="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl">&times;</button>
+        </div>
+
+        <div id="cart-items" class="cart-items">
+            <!-- Cart items will be loaded here -->
+        </div>
+
+        <div id="cart-summary" class="cart-summary">
+            <div class="cart-summary-item">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">Rp 0</span>
+            </div>
+            <div class="cart-summary-item">
+                <span>Diskon:</span>
+                <span id="cart-discount">-Rp 0</span>
+            </div>
+            <div class="cart-total">
+                <div class="cart-summary-item">
+                    <span class="font-bold">Total:</span>
+                    <span id="cart-total-price" class="font-bold">Rp 0</span>
+                </div>
+            </div>
+            <button id="checkout-btn" class="cart-checkout-btn" disabled>
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Cart Button -->
+    <a href="#" id="floating-cart" class="floating-cart hidden" title="Lihat Keranjang" onclick="openCart()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+        </svg>
+        <span id="floating-cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">0</span>
+    </a>
+
+    <!-- Cart Items Count Notification -->
+    <div id="cart-notification" class="cart-notification" style="display: none;">
+        <div class="cart-notification-icon">🛒</div>
+        <div>
+            <div class="font-bold">Item Ditambahkan!</div>
+            <div class="text-sm opacity-90" id="cart-notification-text">Keranjang Anda sekarang memiliki 1 item</div>
+        </div>
+        <button class="cart-notification-close" onclick="hideCartNotification()">×</button>
+    </div>
+
+
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Payment Success Modal -->
+    <div id="payment-success-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content payment-success bg-white rounded-2xl p-8 w-full max-w-md text-center">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-2xl font-bold text-green-600 mb-4">Pesanan Berhasil!</h3>
+            <p class="text-gray-600 mb-4">Terima kasih telah berbelanja di TelugeAgro</p>
+            <div class="bg-green-50 p-4 rounded-xl mb-6">
+                <p class="text-sm text-gray-600">Order ID:</p>
+                <p id="success-order-id" class="font-bold text-green-600"></p>
+                <p class="text-sm text-gray-600 mt-2">Total Pembayaran:</p>
+                <p id="success-total-amount" class="text-2xl font-bold text-green-600"></p>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">Kami akan menghubungi Anda melalui WhatsApp untuk konfirmasi dan pengaturan pengiriman.</p>
+            <div class="flex gap-3">
+                <button onclick="closePaymentSuccess()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-300">
+                    Belanja Lagi
+                </button>
+                <button onclick="contactWhatsApp()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-300">
+                    📱 WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Scripts -->
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import {
+            getAuth,
+            onAuthStateChanged,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            query,
+            orderBy,
+            addDoc,
+            updateDoc,
+            deleteDoc,
+            doc,
+            getDoc,
+            setDoc
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2sLqWwZIxr65c3CcNgKCCjmDTeDlSnfY",
+            authDomain: "telugeagro2025.firebaseapp.com",
+            projectId: "telugeagro2025",
+            storageBucket: "telugeagro2025.firebasestorage.app",
+            messagingSenderId: "1029963109637",
+            appId: "1:1029963109637:web:86824d0db45e1489b3136c",
+            measurementId: "G-XF1JDPME66"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Global variables
+        let allProducts = [];
+        let currentFilter = 'all';
+        let isAdminLoggedIn = false;
+        let currentUser = null;
+        let userUID = null;
+        let isUserLoggedIn = false;
+        let cartItems = {};
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            const authContainer = document.getElementById('auth-button-container');
+            const mobileAuthContainer = document.getElementById('mobile-auth-container');
+            if (user) {
+                currentUser = user;
+                userUID = user.uid;
+                // Show user menu with profile photo
+                authContainer.innerHTML = `
+                    <div id="user-menu" class="flex items-center space-x-3">
+                        <img id="user-avatar" src="${user.photoURL || 'https://via.placeholder.com/32x32?text=U'}" alt="User" class="w-8 h-8 rounded-full border-2 border-green-500 cursor-pointer" onclick="window.location.href='profil.html'">
+                        <span id="user-name" class="text-gray-700 font-medium">${user.displayName || user.email}</span>
+                        <button onclick="window.location.href='profil.html'" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm">
+                            Profile
+                        </button>
+                        <button onclick="logoutUser()" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
+                // Update mobile menu
+                mobileAuthContainer.innerHTML = `
+                    <div class="flex items-center justify-between px-3 py-2 bg-green-600 rounded transition-colors duration-300">
+                        <div class="flex items-center space-x-2">
+                            <img src="${user.photoURL || 'https://via.placeholder.com/24x24?text=U'}" alt="User" class="w-6 h-6 rounded-full border border-white">
+                            <span class="text-white text-sm">${user.displayName || user.email}</span>
+                        </div>
+                        <button onclick="logoutUser()" class="text-white hover:text-green-200 text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
+                // Load user's cart from Firebase
+                loadCart();
+            } else {
+                currentUser = null;
+                userUID = null;
+                // Show login button
+                authContainer.innerHTML = `
+                    <button id="login-btn" onclick="window.location.href='login.html?redirect=store.html'" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300 font-medium flex items-center space-x-2">
+                        <span>Login</span>
+                    </button>
+                `;
+                // Update mobile menu
+                mobileAuthContainer.innerHTML = `
+                    <a href="login.html?redirect=store.html" class="flex items-center px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Login dengan Google
+                    </a>
+                `;
+                // Clear cart for logged out user
+                cartItems = {};
+                updateCartCount();
+            }
+        });
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            const authContainer = document.getElementById('auth-button-container');
+            const mobileAuthContainer = document.getElementById('mobile-auth-container');
+            if (user) {
+                currentUser = user;
+                userUID = user.uid;
+                // Show user menu with profile photo
+                authContainer.innerHTML = `
+                    <div id="user-menu" class="flex items-center space-x-3">
+                        <img id="user-avatar" src="${user.photoURL || 'https://via.placeholder.com/32x32?text=U'}" alt="User" class="w-8 h-8 rounded-full border-2 border-green-500 cursor-pointer" onclick="window.location.href='profil.html'">
+                        <span id="user-name" class="text-gray-700 font-medium">${user.displayName || user.email}</span>
+                        <button onclick="window.location.href='profil.html'" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm">
+                            Profile
+                        </button>
+                        <button onclick="logoutUser()" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
+                // Update mobile menu
+                mobileAuthContainer.innerHTML = `
+                    <div class="flex items-center justify-between px-3 py-2 bg-green-600 rounded transition-colors duration-300">
+                        <div class="flex items-center space-x-2">
+                            <img src="${user.photoURL || 'https://via.placeholder.com/24x24?text=U'}" alt="User" class="w-6 h-6 rounded-full border border-white">
+                            <span class="text-white text-sm">${user.displayName || user.email}</span>
+                        </div>
+                        <button onclick="logoutUser()" class="text-white hover:text-green-200 text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
+            } else {
+                currentUser = null;
+                userUID = null;
+                // Show login button
+                authContainer.innerHTML = `
+                    <button id="login-btn" onclick="window.location.href='login.html?redirect=store.html'" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300 font-medium flex items-center space-x-2">
+                        <span>Login</span>
+                    </button>
+                `;
+                // Update mobile menu
+                mobileAuthContainer.innerHTML = `
+                    <a href="login.html?redirect=store.html" class="flex items-center px-3 py-2 text-white hover:bg-green-600 rounded transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Login dengan Google
+                    </a>
+                `;
+            }
+        });
+
+        // Logout function
+        async function logoutUser() {
+            try {
+                await signOut(auth);
+                // Also clear localStorage for consistency with login.html
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPhoto');
+                showToast('Logout berhasil');
+                // Reload to update UI
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showToast('Gagal logout', 'error');
+            }
+        }
+
+        // Make logoutUser global immediately
+        window.logoutUser = logoutUser;
+
+        // Add activity to cart history
+        function addToCartHistory(action, productName, quantity = 1) {
+            if (!userUID) return;
+            const cartHistory = JSON.parse(localStorage.getItem(`cartHistory_${userUID}`)) || [];
+            cartHistory.unshift({
+                action,
+                productName,
+                quantity,
+                timestamp: new Date().toISOString()
+            });
+
+            // Keep only last 50 activities
+            if (cartHistory.length > 50) {
+                cartHistory.splice(50);
+            }
+
+            localStorage.setItem(`cartHistory_${userUID}`, JSON.stringify(cartHistory));
+        }
+
+        // Authentication check functions
+        function checkUserLogin() {
+            return currentUser !== null;
+        }
+
+        function getUserUID() {
+            return userUID;
+        }
+
+        function redirectToLogin() {
+            window.location.href = 'login.html?redirect=store.html';
+        }
+
+        // Check login status and update UI accordingly
+        function checkLoginStatus() {
+            if (!checkUserLogin()) {
+                // User not logged in, redirect or show login button
+                // Optionally clear user-specific cart or data
+                updateCartCount();
+            } else {
+                // User logged in, update cart count with user-specific cart
+                updateCartCount();
+            }
+        }
+
+        // Remove duplicate addToCart function without auth check
+        // Remove duplicate updateCartCount function without auth check
+        // Replace mobile-auth-container usage with auth-button-container HTML in mobile menu
+
+        // Update mobile menu to use auth-button-container HTML
+        function updateMobileAuthContainer() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const authButtonContainer = document.getElementById('auth-button-container');
+            const mobileAuthContainer = document.getElementById('mobile-auth-container');
+
+            // Replace mobile-auth-container with auth-button-container HTML
+            if (authButtonContainer && mobileAuthContainer) {
+                mobileAuthContainer.innerHTML = authButtonContainer.innerHTML;
+            }
+        }
+
+        // Update DOMContentLoaded initialization to include checkLoginStatus and updateMobileAuthContainer
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        checkAdminStatus();
+        // Add timeout to loadProducts to prevent hanging
+        await Promise.race([
+            loadProducts(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Load products timeout after 10 seconds')), 10000))
+        ]);
+        checkLoginStatus();
+        updateMobileAuthContainer();
+        updateCartCount();
+        setupFilters();
+        setupSearch();
+
+        // Hide main loading screen after everything is loaded
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
+        }, 500);
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        // Hide loading screen even on error or timeout
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+        // Show error message if timeout
+        if (error.message.includes('timeout')) {
+            const loadingError = document.getElementById('loading-error');
+            loadingError.classList.remove('hidden');
+            showToast('Gagal memuat produk - timeout', 'error');
+        }
+    }
+});
+
+        // Make new functions global
+        window.checkUserLogin = checkUserLogin;
+        window.getUserUID = getUserUID;
+        window.redirectToLogin = redirectToLogin;
+        window.checkLoginStatus = checkLoginStatus;
+        window.addToCartHistory = addToCartHistory;
+        window.showCartNotification = showCartNotification;
+        window.updateMobileAuthContainer = updateMobileAuthContainer;
+
+        // Admin credentials
+        const ADMIN_USERNAME = 'teluge@admin.app';
+        const ADMIN_PASSWORD = 'teluge2025';
+
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Load products from Firebase
+        async function loadProducts() {
+            console.log('loadProducts started');
+            try {
+                showProductsLoading(true);
+                const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(productsQuery);
+                console.log('Firebase querySnapshot received:', querySnapshot.size);
+
+                allProducts = [];
+                querySnapshot.forEach((doc) => {
+                    const productData = doc.data();
+                    allProducts.push({
+                        id: doc.id,
+                        ...productData
+                    });
+                });
+
+                // If no products and it's the first load, add default products
+                if (allProducts.length === 0 && !localStorage.getItem('productsInitialized')) {
+                    console.log('No products found, initializing default products');
+                    await initializeDefaultProducts();
+                    await loadProducts(); // Reload after initialization
+                    return;
+                }
+
+                showProductsLoading(false);
+                renderProducts();
+                console.log('Products loaded and rendered:', allProducts.length);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showProductsLoading(false);
+
+                // Hide loading screen and show error container
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
+
+                const loadingError = document.getElementById('loading-error');
+                loadingError.classList.remove('hidden');
+
+                // Also show toast for additional feedback
+                showToast('Gagal memuat produk', 'error');
+            } finally {
+                console.log('loadProducts finally block executed');
+                // Ensure loading screen is hidden
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            console.log('Loading screen hidden');
+                        }, 300);
+                    }
+                }, 500); // Small delay to ensure DOM is ready
+            }
+        }
+
+        // Initialize default products
+        async function initializeDefaultProducts() {
+            const defaultProducts = [
+                {
+                    title: 'Pisang Cavendish ',
+                    description: 'Manis dan creamy, varietas berkualitas yang paling populer untuk ekspor internasional',
+                    price: 12000,
+                    image: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6687a905-5ec4-43e4-9738-c2cc0c9db9b7.png',
+                    category: 'berkualitas',
+                    createdAt: new Date()
+                },
+                {
+                    title: 'Pisang Organik',
+                    description: 'Ditanam tanpa pestisida, pilihan sehat untuk pasar premium dan kesehatan keluarga',
+                    price: 18000,
+                    image: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ae569231-d922-40c1-b7b2-db4e98abb5e1.png',
+                    category: 'organic',
+                    createdAt: new Date()
+                },
+                {
+                    title: 'Paket Ekspor Bulk',
+                    description: 'Kemasan khusus untuk distributor besar dengan standar internasional (Min. 100kg)',
+                    price: 15000,
+                    image: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0472f936-2084-4f51-9c4d-414ee6926919.png',
+                    category: 'export',
+                    createdAt: new Date()
+                },
+                {
+                    title: 'Pisang Plantain',
+                    description: 'Cocok untuk memasak dan menggoreng, tekstur padat dan rasa yang khas',
+                    price: 14000,
+                    image: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/bd310699-54f4-480f-a0a5-4f8c3610f6d0.png',
+                    category: 'berkualitas',
+                    createdAt: new Date()
+                },
+                {
+                    title: 'Pisang Sutra Mini',
+                    description: 'Pisang manis mini untuk camilan, ukuran kecil tapi rasa yang luar biasa',
+                    price: 25000,
+                    image: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fd4dc657-9fda-44f4-b8a1-358a90c514e9.png',
+                    category: 'berkualitas',
+                    createdAt: new Date()
+                }
+            ];
+
+            try {
+                for (const product of defaultProducts) {
+                    await addDoc(collection(db, 'products'), product);
+                }
+                localStorage.setItem('productsInitialized', 'true');
+                showToast('Produk berhasil diinisialisasi!');
+            } catch (error) {
+                console.error('Error initializing products:', error);
+            }
+        }
+
+        // Show/hide loading state
+        function showProductsLoading(show) {
+            const loading = document.getElementById('products-loading');
+            const grid = document.getElementById('products-grid');
+            const empty = document.getElementById('empty-products');
+            
+            if (show) {
+                loading.style.display = 'grid';
+                grid.style.display = 'none';
+                empty.classList.add('hidden');
+            } else {
+                loading.style.display = 'none';
+                grid.style.display = 'grid';
+            }
+        }
+
+        // Render products
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            const empty = document.getElementById('empty-products');
+            
+            // Filter products based on current filter
+            let filteredProducts = allProducts;
+            if (currentFilter !== 'all') {
+                filteredProducts = allProducts.filter(product => product.category === currentFilter);
+            }
+
+            // Apply search filter
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.title.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filteredProducts.length === 0) {
+                grid.style.display = 'none';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.style.display = 'grid';
+
+            grid.innerHTML = filteredProducts.map((product, index) => `
+                <div class="product-card bg-white rounded-2xl p-6 shadow-lg" data-category="${product.category}" data-aos="fade-up" data-aos-delay="${index * 100}">
+                    ${getBadgeHTML(product.category)}
+                    <div class="relative mb-4">
+                        <img src="${product.image}" 
+                             alt="${product.title}" 
+                             class="w-full h-48 object-cover rounded-xl mb-4"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5QjlCQTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+R2FtYmFyIFRpZGFrIFRlcnNlZGlhPC90ZXh0Pgo8L3N2Zz4='"
+                        <button class="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors duration-300" onclick="toggleWishlist(this)">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                        ${isAdminLoggedIn ? `
+                        <div class="absolute top-2 left-2 flex gap-1">
+                            <button onclick="editProduct('${product.id}')" class="bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-300" title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="deleteProduct('${product.id}', '${product.title}')" class="bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 transition-colors duration-300" title="Hapus">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">${product.title}</h3>
+                    <p class="text-gray-600 mb-4 text-sm">${product.description}</p>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="price-tag">Rp ${formatPrice(product.price)}/kg</div>
+                        <div class="flex items-center text-yellow-500">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <span class="text-sm ml-1">4.8 (${Math.floor(Math.random() * 100) + 50})</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="quantity-selector">
+                            <button class="quantity-btn" onclick="decreaseQuantity(this)">-</button>
+                            <input type="number" class="quantity-input" value="1" min="1" max="100">
+                            <button class="quantity-btn" onclick="increaseQuantity(this)">+</button>
+                        </div>
+                        <button class="flex-1 bg-green-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-green-700 transition-all duration-300 btn-bounce" onclick="addToCart('${product.title}', ${product.price}, this)">
+                            Tambah ke Keranjang
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Re-initialize AOS for new elements
+            AOS.refresh();
+        }
+
+        // Get badge HTML based on category
+        function getBadgeHTML(category) {
+            const badges = {
+                'berkualitas': '<div class="product-badge">BERKUALITAS</div>',
+                'organic': '<div class="product-badge organic">ORGANIK</div>',
+                'export': '<div class="product-badge new">EXPORT GRADE</div>'
+            };
+            return badges[category] || '';
+        }
+
+        // Format price
+        function formatPrice(price) {
+            return new Intl.NumberFormat('id-ID').format(price);
+        }
+
+        // Admin functions
+        function checkAdminStatus() {
+            isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (isAdminLoggedIn) {
+                renderProducts(); // Re-render to show admin controls
+            }
+        }
+
+        // Show admin menu
+        function showAdminMenu() {
+            document.getElementById('adminMenu').classList.remove('hidden');
+        }
+
+        function hideAdminMenu() {
+            document.getElementById('adminMenu').classList.add('hidden');
+        }
+
+        // Admin login
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        // Product management
+        function showAddProductModal() {
+            document.getElementById('productModalTitle').textContent = 'Tambah Produk';
+            document.getElementById('productForm').reset();
+            document.getElementById('productForm').removeAttribute('data-edit-id');
+            document.getElementById('productModal').classList.remove('hidden');
+            hideAdminMenu();
+        }
+
+        async function editProduct(productId) {
+            try {
+                const product = allProducts.find(p => p.id === productId);
+                if (!product) return;
+
+                document.getElementById('productModalTitle').textContent = 'Edit Produk';
+                document.getElementById('productTitle').value = product.title;
+                document.getElementById('productDescription').value = product.description;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productImage').value = product.image;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productForm').setAttribute('data-edit-id', productId);
+                document.getElementById('productModal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading product for edit:', error);
+                showToast('Gagal memuat data produk', 'error');
+            }
+        }
+
+        async function deleteProduct(productId, productTitle) {
+            if (!confirm(`Yakin ingin menghapus produk "${productTitle}"?`)) return;
+
+            try {
+                await deleteDoc(doc(db, 'products', productId));
+                showToast('Produk berhasil dihapus!');
+                await loadProducts();
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showToast('Gagal menghapus produk', 'error');
+            }
+        }
+
+        function logoutAdmin() {
+            console.log('logoutAdmin called');
+            localStorage.removeItem('adminLoggedIn');
+            isAdminLoggedIn = false;
+            hideAdminMenu();
+            renderProducts(); // Re-render to hide admin controls
+            showToast('Logout berhasil');
+            console.log('Admin logged out successfully');
+        }
+
+        // Save Cart to Firebase
+        async function saveCartToFirebase() {
+            if (!userUID) {
+                console.log('No user UID, cannot save cart to Firebase');
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, 'carts', userUID);
+                await setDoc(cartRef, {
+                    items: cartItems,
+                    lastUpdated: new Date()
+                });
+                console.log('Cart saved to Firebase for user:', userUID);
+            } catch (error) {
+                console.error('Error saving cart to Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                localStorage.setItem(cartKey, JSON.stringify(cartItems));
+                console.log('Cart saved to localStorage as fallback');
+            }
+        }
+
+        // Load Cart from Firebase
+        async function loadCartFromFirebase() {
+            if (!userUID) {
+                console.log('No user UID, cannot load cart from Firebase');
+                cartItems = {};
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, 'carts', userUID);
+                const cartSnap = await getDoc(cartRef);
+
+                if (cartSnap.exists()) {
+                    cartItems = cartSnap.data().items || {};
+                    console.log('Cart loaded from Firebase for user:', userUID, cartItems);
+                } else {
+                    // No Firebase cart, try localStorage
+                    const cartKey = `cart_${userUID}`;
+                    const cartData = localStorage.getItem(cartKey);
+                    cartItems = JSON.parse(cartData) || {};
+                    console.log('Cart loaded from localStorage for user:', userUID, cartItems);
+                }
+            } catch (error) {
+                console.error('Error loading cart from Firebase:', error);
+                // Fallback to localStorage
+                const cartKey = `cart_${userUID}`;
+                const cartData = localStorage.getItem(cartKey);
+                cartItems = JSON.parse(cartData) || {};
+                console.log('Cart loaded from localStorage as fallback for user:', userUID, cartItems);
+            }
+        }
+
+        // Save Cart (to both Firebase and localStorage)
+        async function saveCart() {
+            if (!userUID) {
+                console.log('No user UID, cannot save cart');
+                return;
+            }
+
+            // Save to Firebase first
+            await saveCartToFirebase();
+
+            // Also save to localStorage as backup
+            const cartKey = `cart_${userUID}`;
+            localStorage.setItem(cartKey, JSON.stringify(cartItems));
+            console.log('Cart saved for user:', userUID);
+            updateCartCount();
+        }
+
+        // Load Cart (from Firebase with localStorage fallback)
+        async function loadCart() {
+            await loadCartFromFirebase();
+            updateCartCount();
+        }
+
+        // Cart functions
+        async function addToCart(productName, price, button) {
+            // Check if user is logged in
+            if (!checkUserLogin()) {
+                redirectToLogin();
+                return;
+            }
+
+            const card = button.closest('.product-card');
+            const quantityInput = card.querySelector('.quantity-input');
+            const quantity = parseInt(quantityInput.value) || 1;
+            const img = card.querySelector('img');
+            const image = img ? img.src : '';
+
+            // Add or update item
+            if (cartItems[productName]) {
+                cartItems[productName].quantity += quantity;
+            } else {
+                cartItems[productName] = {
+                    product: productName,
+                    price: price,
+                    quantity: quantity,
+                    image: image
+                };
+            }
+
+            // Save cart
+            await saveCart();
+
+            // Show animation
+            button.classList.add('add-to-cart-success');
+            const cartIcon = document.getElementById('cart-count').parentElement;
+            cartIcon.classList.add('cart-shake');
+
+            setTimeout(() => {
+                button.classList.remove('add-to-cart-success');
+                cartIcon.classList.remove('cart-shake');
+            }, 800);
+
+            // Reset quantity
+            quantityInput.value = 1;
+
+            // Show cart notification
+            showCartNotification(productName, quantity);
+
+            showToast(`${productName} ditambahkan ke keranjang!`);
+        }
+
+        function updateCartCount() {
+            let totalItems = 0;
+            if (userUID && cartItems) {
+                // User is logged in, use cartItems loaded from Firebase
+                totalItems = Object.values(cartItems).reduce((sum, item) => sum + item.quantity, 0);
+            } else {
+                // User not logged in, cart count should be 0
+                totalItems = 0;
+            }
+
+            document.getElementById('cart-count').textContent = totalItems;
+            document.getElementById('cart-count-mobile').textContent = totalItems;
+            document.getElementById('cart-count-float').textContent = totalItems;
+            document.getElementById('floating-cart-count').textContent = totalItems;
+        }
+
+        // Quantity controls
+        function increaseQuantity(button) {
+            const input = button.parentElement.querySelector('.quantity-input');
+            const currentValue = parseInt(input.value) || 1;
+            const maxValue = parseInt(input.getAttribute('max')) || 100;
+            
+            if (currentValue < maxValue) {
+                input.value = currentValue + 1;
+            }
+        }
+
+        function decreaseQuantity(button) {
+            const input = button.parentElement.querySelector('.quantity-input');
+            const currentValue = parseInt(input.value) || 1;
+            const minValue = parseInt(input.getAttribute('min')) || 1;
+            
+            if (currentValue > minValue) {
+                input.value = currentValue - 1;
+            }
+        }
+
+        // Filter functions
+        function setupFilters() {
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update active state
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update current filter
+                    currentFilter = tab.getAttribute('data-filter');
+                    
+                    // Re-render products
+                    renderProducts();
+                });
+            });
+        }
+
+        // Search function
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', () => {
+                renderProducts();
+            });
+        }
+
+        // Wishlist function
+        function toggleWishlist(button) {
+            const heart = button.querySelector('svg');
+            if (heart.getAttribute('fill') === 'none') {
+                heart.setAttribute('fill', 'currentColor');
+                button.classList.add('text-red-600');
+                showToast('Ditambahkan ke wishlist!');
+            } else {
+                heart.setAttribute('fill', 'none');
+                button.classList.remove('text-red-600');
+                showToast('Dihapus dari wishlist!');
+            }
+        }
+
+        // Cart notification functions
+        function showCartNotification(productName, quantity) {
+            const notification = document.getElementById('cart-notification');
+            const notificationText = document.getElementById('cart-notification-text');
+
+            // Update notification text
+            notificationText.textContent = `${productName} ditambahkan ke keranjang! (${quantity} item${quantity > 1 ? 's' : ''})`;
+
+            // Show notification
+            notification.classList.add('show');
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                hideCartNotification();
+            }, 3000);
+        }
+
+        function hideCartNotification() {
+            const notification = document.getElementById('cart-notification');
+            notification.classList.remove('show');
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkAdminStatus();
+    loadProducts();
+    updateCartCount();
+    setupFilters();
+    setupSearch();
+
+    // Fallback: Hide loading screen after 5 seconds if loadProducts doesn't complete
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 300);
+        }
+    }, 5000);
+});
+
+
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+
+mobileMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('active');
+});
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar');
+    if (window.scrollY > 50) {
+        navbar.style.background = 'rgba(34, 197, 94, 0.95)';
+        navbar.style.backdropFilter = 'blur(10px)';
+    } else {
+        navbar.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%)';
+        navbar.style.backdropFilter = 'none';
+    }
+});
+
+// Admin panel
+document.getElementById('accountBtn').addEventListener('click', () => {
+    if (isAdminLoggedIn) {
+        showAdminMenu();
+    } else {
+        showLoginModal();
+    }
+});
+
+// Close admin menu when clicking outside
+document.addEventListener('click', (e) => {
+    const adminMenu = document.getElementById('adminMenu');
+    const accountBtn = document.getElementById('accountBtn');
+    if (!adminMenu.contains(e.target) && !accountBtn.contains(e.target)) {
+        hideAdminMenu();
+    }
+});
+
+// Login form
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const errorElement = document.getElementById('loginError');
+    
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        localStorage.setItem('adminLoggedIn', 'true');
+        isAdminLoggedIn = true;
+        hideLoginModal();
+        showAdminMenu();
+        renderProducts(); // Re-render to show admin controls
+        showToast('Login berhasil!');
+    } else {
+        errorElement.textContent = 'Username atau password salah!';
+        errorElement.classList.remove('hidden');
+    }
+});
+
+// Login cancel
+document.getElementById('loginCancel').addEventListener('click', hideLoginModal);
+
+// Product form
+document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const title = document.getElementById('productTitle').value.trim();
+    const description = document.getElementById('productDescription').value.trim();
+    const price = parseInt(document.getElementById('productPrice').value);
+    const image = document.getElementById('productImage').value.trim();
+    const category = document.getElementById('productCategory').value;
+    const editId = e.target.getAttribute('data-edit-id');
+    if (!title || !description || !price || !image || !category) {
+        showToast('Semua field harus diisi!', 'error');
+        return;
+    }
+    try {
+        const productData = {
+            title,
+            description,
+            price,
+            image,
+            category,
+            updatedAt: new Date()
+        };
+        if (editId) {
+            // Update existing product
+            await updateDoc(doc(db, 'products', editId), productData);
+            showToast('Produk berhasil diperbarui!');
+        } else {
+            // Add new product
+            productData.createdAt = new Date();
+            await addDoc(collection(db, 'products'), productData);
+            showToast('Produk berhasil ditambahkan!');
+        }
+        document.getElementById('productModal').classList.add('hidden');
+        await loadProducts();
+    } catch (error) {
+        console.error('Error saving product:', error);
+        showToast('Gagal menyimpan produk', 'error');
+    }
+});
+
+// Product modal cancel
+document.getElementById('cancelProductBtn').addEventListener('click', () => {
+    document.getElementById('productModal').classList.add('hidden');
+});
+
+// Close modals when clicking outside
+document.getElementById('loginModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) hideLoginModal();
+});
+
+document.getElementById('productModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+        document.getElementById('productModal').classList.add('hidden');
+    }
+});
+
+// Cart sidebar event listeners
+document.getElementById('close-cart').addEventListener('click', closeCart);
+document.getElementById('cart-overlay').addEventListener('click', closeCart);
+
+        // Cart sidebar functions
+        function openCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+
+            cartSidebar.classList.add('open');
+            cartOverlay.classList.add('active');
+            updateCartDisplay();
+        }
+
+        function closeCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+
+            cartSidebar.classList.remove('open');
+            cartOverlay.classList.remove('active');
+            // Update cart display when closing
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartItemsElement = document.getElementById('cart-items');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotalPrice = document.getElementById('cart-total-price');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            let subtotal = 0;
+            let totalItems = 0;
+
+            if (Object.keys(cartItems).length === 0) {
+                cartItemsElement.innerHTML = `
+                    <div class="cart-empty">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Keranjang Kosong</h3>
+                        <p class="text-gray-500 text-sm">Belum ada produk di keranjang Anda</p>
+                    </div>
+                `;
+                checkoutBtn.disabled = true;
+            } else {
+                cartItemsElement.innerHTML = Object.values(cartItems).map(item => {
+                    const itemTotal = item.price * item.quantity;
+                    subtotal += itemTotal;
+                    totalItems += item.quantity;
+
+                    // Find product image from allProducts by matching product title
+                    const productData = allProducts.find(product => product.title === item.product);
+                    const productImage = productData ? productData.image : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjMwIiB5PSIzMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmaWxsPSIjOUI5QkE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';
+
+                    return `
+                        <div class="cart-item">
+                            <img src="${productImage}" alt="${item.product}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjMwIiB5PSIzMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmaWxsPSIjOUI5QkE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='">
+                            <div class="cart-item-info">
+                                <h4 class="cart-item-title">${item.product}</h4>
+                                <p class="cart-item-price">Rp ${formatPrice(item.price)}</p>
+                            </div>
+                            <div class="cart-item-controls">
+                                <div class="cart-quantity-control">
+                                    <button class="cart-quantity-btn" onclick="updateCartItemQuantity('${item.product}', ${item.quantity - 1})">-</button>
+                                    <input type="number" class="cart-quantity-input" value="${item.quantity}" min="1" onchange="updateCartItemQuantity('${item.product}', this.value)">
+                                    <button class="cart-quantity-btn" onclick="updateCartItemQuantity('${item.product}', ${item.quantity + 1})">+</button>
+                                </div>
+                                <button class="cart-remove-btn" onclick="removeCartItem('${item.product}')">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                checkoutBtn.disabled = false;
+            }
+
+            cartSubtotal.textContent = `Rp ${formatPrice(subtotal)}`;
+            cartTotalPrice.textContent = `Rp ${formatPrice(subtotal)}`;
+
+            // Update floating cart count
+            document.getElementById('floating-cart-count').textContent = totalItems;
+            document.getElementById('cart-count').textContent = totalItems;
+            document.getElementById('cart-count-mobile').textContent = totalItems;
+
+            // Show/hide floating cart
+            const floatingCart = document.getElementById('floating-cart');
+            if (totalItems > 0) {
+                floatingCart.classList.remove('hidden');
+            } else {
+                floatingCart.classList.add('hidden');
+            }
+        }
+
+        async function updateCartItemQuantity(productName, newQuantity) {
+            newQuantity = parseInt(newQuantity);
+
+            if (newQuantity <= 0) {
+                delete cartItems[productName];
+            } else {
+                if (cartItems[productName]) {
+                    cartItems[productName].quantity = newQuantity;
+                }
+            }
+
+            await saveCart();
+            updateCartDisplay();
+            showToast('Keranjang diperbarui!');
+        }
+
+        async function removeCartItem(productName) {
+            delete cartItems[productName];
+            await saveCart();
+            updateCartDisplay();
+            showToast('Item dihapus dari keranjang!');
+        }
+
+        // Checkout function
+        function checkout() {
+            // Redirect to cart.html for checkout process
+            window.location.href = 'cart.html';
+        }
+
+        // Close payment success modal
+        function closePaymentSuccess() {
+            document.getElementById('payment-success-modal').classList.add('hidden');
+        }
+
+        // Contact via WhatsApp
+        function contactWhatsApp() {
+            const phoneNumber = '628112638318'; // TelugeAgro WhatsApp number
+            const message = 'Halo TelugeAgro, saya ingin mengkonfirmasi pesanan saya!';
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Make functions global
+        window.showAddProductModal = showAddProductModal;
+        window.editProduct = editProduct;
+        window.deleteProduct = deleteProduct;
+        window.logoutAdmin = logoutAdmin;
+        window.addToCart = addToCart;
+        window.increaseQuantity = increaseQuantity;
+        window.decreaseQuantity = decreaseQuantity;
+        window.toggleWishlist = toggleWishlist;
+        window.openCart = openCart;
+        window.closeCart = closeCart;
+        window.updateCartItemQuantity = updateCartItemQuantity;     
+        window.removeCartItem = removeCartItem;
+        window.checkout = checkout;
+        window.closePaymentSuccess = closePaymentSuccess;
+        window.contactWhatsApp = contactWhatsApp;
+    </script>
+</body>
+</html>
