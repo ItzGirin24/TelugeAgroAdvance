@@ -1955,11 +1955,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         function updateCartCount() {
             let totalItems = 0;
-            if (userUID && cartItems) {
-                // User is logged in, use cartItems loaded from Firebase
-                totalItems = Object.values(cartItems).reduce((sum, item) => sum + item.quantity, 0);
+            if (userUID) {
+                // User is logged in, use their specific cart
+                const cartKey = `cart_${userUID}`;
+                const cart = JSON.parse(localStorage.getItem(cartKey)) || {};
+                totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
             } else {
                 // User not logged in, cart count should be 0
+                // Optionally clear any existing cart data for non-logged in users
+                localStorage.removeItem('cart');
                 totalItems = 0;
             }
 
@@ -2227,8 +2231,9 @@ document.getElementById('cart-overlay').addEventListener('click', closeCart);
             updateCartDisplay();
         }
 
-        function updateCartDisplay() {
-            const cartItemsElement = document.getElementById('cart-items');
+function updateCartDisplay() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || {};
+            const cartItems = document.getElementById('cart-items');
             const cartSubtotal = document.getElementById('cart-subtotal');
             const cartTotalPrice = document.getElementById('cart-total-price');
             const checkoutBtn = document.getElementById('checkout-btn');
@@ -2236,8 +2241,8 @@ document.getElementById('cart-overlay').addEventListener('click', closeCart);
             let subtotal = 0;
             let totalItems = 0;
 
-            if (Object.keys(cartItems).length === 0) {
-                cartItemsElement.innerHTML = `
+            if (Object.keys(cart).length === 0) {
+                cartItems.innerHTML = `
                     <div class="cart-empty">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
@@ -2248,7 +2253,7 @@ document.getElementById('cart-overlay').addEventListener('click', closeCart);
                 `;
                 checkoutBtn.disabled = true;
             } else {
-                cartItemsElement.innerHTML = Object.values(cartItems).map(item => {
+                cartItems.innerHTML = Object.values(cart).map(item => {
                     const itemTotal = item.price * item.quantity;
                     subtotal += itemTotal;
                     totalItems += item.quantity;
@@ -2300,25 +2305,27 @@ document.getElementById('cart-overlay').addEventListener('click', closeCart);
             }
         }
 
-        async function updateCartItemQuantity(productName, newQuantity) {
+        function updateCartItemQuantity(productName, newQuantity) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || {};
             newQuantity = parseInt(newQuantity);
 
             if (newQuantity <= 0) {
-                delete cartItems[productName];
+                delete cart[productName];
             } else {
-                if (cartItems[productName]) {
-                    cartItems[productName].quantity = newQuantity;
+                if (cart[productName]) {
+                    cart[productName].quantity = newQuantity;
                 }
             }
 
-            await saveCart();
+            localStorage.setItem('cart', JSON.stringify(cart));
             updateCartDisplay();
             showToast('Keranjang diperbarui!');
         }
 
-        async function removeCartItem(productName) {
-            delete cartItems[productName];
-            await saveCart();
+        function removeCartItem(productName) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || {};
+            delete cart[productName];
+            localStorage.setItem('cart', JSON.stringify(cart));
             updateCartDisplay();
             showToast('Item dihapus dari keranjang!');
         }
