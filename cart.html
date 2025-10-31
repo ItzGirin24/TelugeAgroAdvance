@@ -376,7 +376,15 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Firebase Auth will handle authentication check -->
+    <!-- Authentication Check -->
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('adminLoggedIn') && !localStorage.getItem('userLoggedIn')) {
+            // Redirect to login page with current page as redirect parameter
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+        }
+    </script>
 
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
@@ -578,13 +586,13 @@
                                     <span>Subtotal:</span>
                                     <span id="subtotal">Rp 0</span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span>Ongkos Kirim:</span>
+                                    <span id="shipping-cost">-</span>
+                                </div>
                                 <div class="flex justify-between text-sm text-green-200">
                                     <span>Diskon:</span>
                                     <span id="discount">- Rp 0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Ongkos Kirim:</span>
-                                    <span id="shipping-cost">Ongkir Akan dikonfirmasi oleh Admin lewat Whatshapp</span>
                                 </div>
                                 <div class="border-t border-green-400 pt-4">
                                     <div class="flex justify-between text-xl font-bold">
@@ -734,17 +742,21 @@
         </div>
     </footer>
 
-  <!-- Floating Buttons -->
-    <a href="https://wa.me/6281234567890?text=Halo%20TelugeAgro,%20saya%20ingin%20bertanya%20tentang%20produk%20pisang" class="whatsapp-float" target="_blank">
-        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-        </svg>
-    </a>
-    <a href="cart.html" class="cart-float">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Cart Float Button -->
+    <div class="cart-float" onclick="window.location.href='cart.html'" title="Lihat Keranjang">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
         </svg>
-        <span class="cart-count-float" id="cart-count-float">0</span>
+        <span id="cart-count-float" class="cart-count-float">0</span>
+    </div>
+
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/628112638318?text=Halo%20TelugeAgro,%20saya%20butuh%20bantuan%20dengan%20pesanan%20saya!"
+       class="whatsapp-float"
+       target="_blank"
+       rel="noopener noreferrer"
+       title="Bantuan WhatsApp">
+        📱
     </a>
 
     <!-- Toast Notification -->
@@ -757,11 +769,6 @@
         // Firebase SDK imports
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import {
-            getAuth,
-            onAuthStateChanged,
-            signOut
-        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-        import {
             getFirestore,
             collection,
             getDocs,
@@ -771,9 +778,7 @@
             updateDoc,
             doc,
             where,
-            limit,
-            setDoc,
-            getDoc
+            limit
         } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -788,33 +793,11 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
 
         // Global Variables
         let cartItems = {};
         let allProducts = [];
         let appliedPromo = null;
-        let currentUser = null;
-        let userUID = null;
-
-        // Authentication check - redirect if not logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in
-                currentUser = user;
-                userUID = user.uid;
-                console.log('User logged in:', user.email);
-                
-                // Load cart and data after auth is confirmed
-                loadCart();
-                loadProducts();
-                loadPurchaseHistory();
-            } else {
-                // No user is signed in, redirect to login
-                const currentPage = window.location.pathname.split('/').pop() || 'cart.html';
-                window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
-            }
-        });
 
         // Save order to Firebase
         async function saveOrderToFirebase(orderData) {
@@ -827,33 +810,42 @@
             }
         }
 
+        // Update order status
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const orderRef = doc(db, 'orders', orderId);
+                await updateDoc(orderRef, {
+                    status: status,
+                    paymentStatus: status === 'paid' ? 'paid' : 'pending',
+                    updatedAt: new Date()
+                });
+                console.log(`Order ${orderId} status updated to ${status}`);
+            } catch (error) {
+                console.error('Error updating order status:', error);
+            }
+        }
+
         // Get Snap Token from server
-// Get Snap Token from server
-async function getSnapToken(transactionData) {
-  try {
-const response = await fetch('/api/get-snap-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(transactionData)
-    });
-
-    const result = await response.json(); // ⬅️ Tambahkan ini
-    console.log('📦 Data dikirim ke server:', transactionData);
-    console.log('📩 Respon dari server:', result);
-
-    if (result.token) {
-      return result.token;
-    } else {
-      throw new Error(result.error || 'Failed to get snap token');
-    }
-  } catch (error) {
-    console.error('Error getting snap token:', error);
-    throw error;
-  }
-}
-
+        async function getSnapToken(transactionData) {
+            try {
+                const response = await fetch('/api/get-snap-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transactionData)
+                });
+                const result = await response.json();
+                if (result.token) {
+                    return result.token;
+                } else {
+                    throw new Error(result.error || 'Failed to get snap token');
+                }
+            } catch (error) {
+                console.error('Error getting snap token:', error);
+                throw error;
+            }
+        }
 
         // Load products for recommendations
         async function loadProducts() {
@@ -926,14 +918,15 @@ const response = await fetch('/api/get-snap-token', {
         // Load purchase history
         async function loadPurchaseHistory() {
             try {
-                if (!userUID) {
+                const customerEmail = localStorage.getItem('customerEmail');
+                if (!customerEmail) {
                     document.getElementById('purchase-history-container').innerHTML = '<p class="text-sm text-gray-500 text-center">Belum ada riwayat pembelian</p>';
                     return;
                 }
 
                 const ordersQuery = query(
                     collection(db, 'orders'),
-                    where('customerUID', '==', userUID),
+                    where('email', '==', customerEmail),
                     orderBy('timestamp', 'desc'),
                     limit(3)
                 );
@@ -976,7 +969,10 @@ const response = await fetch('/api/get-snap-token', {
                 document.getElementById('loading-screen').style.opacity = '0';
                 setTimeout(function() {
                     document.getElementById('loading-screen').style.display = 'none';
-                    
+                    loadCart();
+                    loadProducts();
+                    loadPurchaseHistory();
+
                     // Check for payment callback in URL params
                     const urlParams = new URLSearchParams(window.location.search);
                     const status = urlParams.get('status');
@@ -998,88 +994,24 @@ const response = await fetch('/api/get-snap-token', {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Load Cart from Firebase (with localStorage fallback)
-        async function loadCart() {
-            if (!userUID) {
-                console.log('No user UID, cannot load cart');
+        // Load Cart from LocalStorage
+        function loadCart() {
+            // Check if user is logged in, if not, clear cart
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') || localStorage.getItem('userLoggedIn');
+            if (!isLoggedIn) {
                 cartItems = {};
-                return;
+                localStorage.removeItem('cart');
+            } else {
+                const cartData = localStorage.getItem('cart');
+                cartItems = JSON.parse(cartData) || {};
             }
-
-            await loadCartFromFirebase();
             renderCart();
             updateCartUI();
         }
 
-        // Save Cart to Firebase (with localStorage fallback)
-        async function saveCartToFirebase() {
-            if (!userUID) {
-                console.log('No user UID, cannot save cart to Firebase');
-                return;
-            }
-
-            try {
-                const cartRef = doc(db, 'carts', userUID);
-                await setDoc(cartRef, {
-                    items: cartItems,
-                    lastUpdated: new Date()
-                });
-                console.log('Cart saved to Firebase for user:', userUID);
-            } catch (error) {
-                console.error('Error saving cart to Firebase:', error);
-                // Fallback to localStorage
-                const cartKey = `cart_${userUID}`;
-                localStorage.setItem(cartKey, JSON.stringify(cartItems));
-                console.log('Cart saved to localStorage as fallback');
-            }
-        }
-
-        // Load Cart from Firebase (with localStorage fallback)
-        async function loadCartFromFirebase() {
-            if (!userUID) {
-                console.log('No user UID, cannot load cart from Firebase');
-                cartItems = {};
-                return;
-            }
-
-            try {
-                const cartRef = doc(db, 'carts', userUID);
-                const cartSnap = await getDoc(cartRef);
-
-                if (cartSnap.exists()) {
-                    cartItems = cartSnap.data().items || {};
-                    console.log('Cart loaded from Firebase for user:', userUID, cartItems);
-                } else {
-                    // No Firebase cart, try localStorage
-                    const cartKey = `cart_${userUID}`;
-                    const cartData = localStorage.getItem(cartKey);
-                    cartItems = JSON.parse(cartData) || {};
-                    console.log('Cart loaded from localStorage for user:', userUID, cartItems);
-                }
-            } catch (error) {
-                console.error('Error loading cart from Firebase:', error);
-                // Fallback to localStorage
-                const cartKey = `cart_${userUID}`;
-                const cartData = localStorage.getItem(cartKey);
-                cartItems = JSON.parse(cartData) || {};
-                console.log('Cart loaded from localStorage as fallback for user:', userUID, cartItems);
-            }
-        }
-
-        // Save Cart to LocalStorage (user-specific) - kept for backward compatibility
+        // Save Cart to LocalStorage
         function saveCart() {
-            if (!userUID) {
-                console.log('No user UID, cannot save cart');
-                return;
-            }
-
-            // Save to Firebase first
-            saveCartToFirebase();
-
-            // Also save to localStorage as backup
-            const cartKey = `cart_${userUID}`;
-            localStorage.setItem(cartKey, JSON.stringify(cartItems));
-            console.log('Cart saved for user:', userUID);
+            localStorage.setItem('cart', JSON.stringify(cartItems));
             updateCartUI();
         }
 
@@ -1105,7 +1037,7 @@ const response = await fetch('/api/get-snap-token', {
             container.innerHTML = items.map((item, index) => {
                 // Find product image from Firebase products
                 const productData = allProducts.find(product => product.title === item.product);
-                const productImage = productData ? productData.image : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjQwIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmaWxsPSIjOUI5QkE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';
+                const productImage = productData ? productData.image : 'https://via.placeholder.com/80x80?text=No+Image';
 
                 return `
                 <div class="cart-item bg-gray-50 rounded-xl p-6 mb-4 border border-gray-200" data-product="${item.product}" data-aos="fade-up" data-aos-delay="${index * 100}">
@@ -1306,7 +1238,6 @@ const response = await fetch('/api/get-snap-token', {
             const total = subtotal - discount;
 
             const orderData = {
-                customerUID: userUID,
                 customerName: name,
                 name: name,
                 email: email,
@@ -1331,9 +1262,8 @@ const response = await fetch('/api/get-snap-token', {
                 const orderId = await saveOrderToFirebase(orderData);
                 console.log('Order saved successfully:', orderId);
 
-                // Clear cart after successful order
-                cartItems = {};
-                saveCart();
+                // Store customer email for order tracking
+                localStorage.setItem('customerEmail', orderData.email);
 
                 // Close checkout modal
                 document.getElementById('checkout-modal').classList.add('hidden');
@@ -1364,15 +1294,24 @@ const response = await fetch('/api/get-snap-token', {
                 snap.pay(snapToken, {
                     onSuccess: function(result) {
                         console.log('Payment success:', result);
-                        window.location.href = `cart.html?status=finish&order_id=${orderId}`;
+                        // Update order status to paid
+                        updateOrderStatus(orderId, 'paid');
+                        // Show success modal immediately
+                        showPaymentSuccess(orderId, total, orderData);
+                        // Clear cart after successful payment
+                        cartItems = {};
+                        saveCart();
+                        renderCart();
                     },
                     onPending: function(result) {
                         console.log('Payment pending:', result);
-                        window.location.href = `cart.html?status=pending&order_id=${orderId}`;
+                        // Update order status to pending
+                        updateOrderStatus(orderId, 'pending');
+                        showToast('Pembayaran sedang diproses.', 'warning');
                     },
                     onError: function(result) {
                         console.log('Payment error:', result);
-                        window.location.href = `cart.html?status=error&order_id=${orderId}`;
+                        showToast('Pembayaran gagal.', 'error');
                     },
                     onClose: function() {
                         console.log('Payment popup closed');
@@ -1414,9 +1353,9 @@ const response = await fetch('/api/get-snap-token', {
                         <button onclick="location.href='store.html'" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-300">
                             Belanja Lagi
                         </button>
-                        <button onclick="location.href='pesanan.html'" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-300">
+                        <button onclick="location.href='profil.html'" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-300">
                             📦 Chek Pesanan
-                        
+
                         </button>
                         <button onclick="contactWhatsApp('${orderId}', ${total})" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-300">
                             📱 WhatsApp
@@ -1515,7 +1454,7 @@ const response = await fetch('/api/get-snap-token', {
                     // Show success message and redirect
                     showToast('Pembayaran berhasil!');
                     setTimeout(() => {
-                        window.location.href = 'pesanan.html';
+                        window.location.href = 'profil.html';
                     }, 2000);
                 } else if (status === 'pending') {
                     showToast('Pembayaran sedang diproses.', 'warning');
@@ -1542,6 +1481,7 @@ const response = await fetch('/api/get-snap-token', {
 
         // Make functions global
         window.saveOrderToFirebase = saveOrderToFirebase;
+        window.updateOrderStatus = updateOrderStatus;
         window.applyPromo = applyPromo;
         window.addRecommendation = addRecommendation;
         window.increaseQuantity = increaseQuantity;
